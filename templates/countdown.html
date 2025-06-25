@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Special Countdown{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">Our Next Special Date</h2>
+                    <p class="text-muted">Counting down to our next beautiful moment together</p>
+                </div>
+
+                <div class="countdown-container text-center">
+                    <div class="row g-3">
+                        <div class="col-3">
+                            <div class="countdown-box">
+                                <div class="countdown-value" id="days">00</div>
+                                <div class="countdown-label">Days</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="countdown-box">
+                                <div class="countdown-value" id="hours">00</div>
+                                <div class="countdown-label">Hours</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="countdown-box">
+                                <div class="countdown-value" id="minutes">00</div>
+                                <div class="countdown-label">Minutes</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="countdown-box">
+                                <div class="countdown-value" id="seconds">00</div>
+                                <div class="countdown-label">Seconds</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="special-message mt-4 text-center">
+                    <p class="lead" id="specialMessage">Every moment with you is precious</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.countdown-box {
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.countdown-box:hover {
+    transform: translateY(-5px);
+}
+
+.countdown-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.countdown-label {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.special-message {
+    font-family: 'Georgia', serif;
+    color: #666;
+    padding: 20px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+</style>
+
+<script>
+// Set your target date here (year, month (0-11), day, hour, minute, second)
+const targetDate = new Date(2024, 11, 31, 23, 59, 59).getTime();
+
+const messages = [
+    "Every moment with you is precious",
+    "You make my heart skip a beat",
+    "Can't wait to see your beautiful smile",
+    "You're the best thing that's ever happened to me",
+    "Counting down to our next adventure together"
+];
+
+function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = targetDate - now;
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById('days').textContent = String(days).padStart(2, '0');
+    document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+    document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+
+    // Update special message every 5 seconds
+    if (seconds % 5 === 0) {
+        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+        const messageElement = document.getElementById('specialMessage');
+        messageElement.style.opacity = '0';
+        setTimeout(() => {
+            messageElement.textContent = randomMessage;
+            messageElement.style.opacity = '1';
+        }, 500);
+    }
+}
+
+// Update countdown every second
+setInterval(updateCountdown, 1000);
+updateCountdown();
+</script>
+{% endblock %} 

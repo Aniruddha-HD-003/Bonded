@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="text-center mb-4">
+        <h2>Welcome, {{ username }}!</h2>
+        <p class="text-muted">Choose an activity to share with your loved one on Bonded</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <!-- Love Letter Card -->
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-heart fa-3x text-danger mb-3"></i>
+                    <h5 class="card-title">Love Letter</h5>
+                    <p class="card-text">Write a heartfelt message to express your love.</p>
+                    <a href="{{ url_for('love_letter') }}" class="btn btn-outline-danger">
+                        <i class="fas fa-pen me-2"></i>Write Letter
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Game Card -->
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-gamepad fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Memory Game</h5>
+                    <p class="card-text">Test your memory with a fun matching game.</p>
+                    <a href="{{ url_for('memory_game') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-play me-2"></i>Play Game
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Our Memories Card -->
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-images fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Our Memories</h5>
+                    <p class="card-text">View and share your special moments together.</p>
+                    <a href="{{ url_for('photo_gallery') }}" class="btn btn-outline-success">
+                        <i class="fas fa-eye me-2"></i>View Memories
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Special Countdown Card -->
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Special Countdown</h5>
+                    <p class="card-text">Count down to your special moments together.</p>
+                    <a href="{{ url_for('countdown') }}" class="btn btn-outline-warning">
+                        <i class="fas fa-hourglass-half me-2"></i>View Countdown
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Couple Goals Card -->
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-tasks fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">Couple Goals</h5>
+                    <p class="card-text">Set and achieve goals together as a couple.</p>
+                    <a href="{{ url_for('goals') }}" class="btn btn-outline-info">
+                        <i class="fas fa-list-check me-2"></i>View Goals
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Private Chat Card -->
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-comments fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">Private Chat</h5>
+                    <p class="card-text">Send private messages to each other, just like WhatsApp!</p>
+                    <a href="{{ url_for('chat') }}" class="btn btn-info">
+                        <i class="fas fa-comments me-2"></i>
+                        Open Chat
+                        <span class="badge bg-danger ms-2" id="chat-badge" style="display: none;"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+.hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+</style>
+<script>
+// Update unread message count
+function updateUnreadCount() {
+    fetch('/get_unread_count')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const badge = document.getElementById('chat-badge');
+                if (data.count > 0) {
+                    badge.textContent = data.count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        });
+}
+
+// Update unread count every 30 seconds
+setInterval(updateUnreadCount, 30000);
+updateUnreadCount();
+</script>
+{% endblock %} 
