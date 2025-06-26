@@ -1,0 +1,214 @@
+#!/bin/bash
+
+# 🚀 Bonded Social Platform - Production Build Script
+# This script automates the production build process
+
+set -e  # Exit on any error
+
+echo "🚀 Starting Bonded Production Build..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Check prerequisites
+print_status "Checking prerequisites..."
+
+# Check Node.js
+if ! command -v node &> /dev/null; then
+    print_error "Node.js is not installed. Please install Node.js 16+"
+    exit 1
+fi
+
+# Check npm
+if ! command -v npm &> /dev/null; then
+    print_error "npm is not installed. Please install npm 8+"
+    exit 1
+fi
+
+# Check Python
+if ! command -v python3 &> /dev/null; then
+    print_error "Python 3 is not installed. Please install Python 3.11+"
+    exit 1
+fi
+
+# Check pip
+if ! command -v pip3 &> /dev/null; then
+    print_error "pip3 is not installed. Please install pip"
+    exit 1
+fi
+
+print_success "Prerequisites check passed"
+
+# Backend Build
+print_status "Building backend..."
+
+cd backend
+
+# Check if virtual environment exists
+if [ ! -d "venv" ]; then
+    print_status "Creating virtual environment..."
+    python3 -m venv venv
+fi
+
+# Activate virtual environment
+print_status "Activating virtual environment..."
+source venv/bin/activate
+
+# Install dependencies
+print_status "Installing backend dependencies..."
+pip install -r requirements_production.txt
+
+# Check if .env file exists
+if [ ! -f ".env" ]; then
+    print_warning "No .env file found. Please create one with your production settings."
+    print_status "Creating sample .env file..."
+    cat > .env << EOF
+# Django Settings
+DJANGO_SECRET_KEY=your-super-secret-key-here
+DEBUG=False
+
+# Database Configuration
+DB_NAME=your_production_db_name
+DB_USER=your_production_db_user
+DB_PASSWORD=your_production_db_password
+DB_HOST=your_production_db_host
+DB_PORT=5432
+
+# Cloudinary Configuration
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# CORS Settings
+CORS_ALLOWED_ORIGINS=https://your-frontend-domain.com
+EOF
+    print_warning "Please update the .env file with your actual production values"
+fi
+
+# Run Django checks
+print_status "Running Django deployment checks..."
+python manage_production.py check --deploy
+
+print_success "Backend build completed"
+
+# Frontend Build
+print_status "Building frontend..."
+
+cd ../frontend
+
+# Check if .env.production file exists
+if [ ! -f ".env.production" ]; then
+    print_warning "No .env.production file found. Creating one..."
+    cat > .env.production << EOF
+REACT_APP_API_URL=https://your-backend-domain.com/api
+REACT_APP_ENVIRONMENT=production
+REACT_APP_VERSION=1.0.0
+EOF
+    print_warning "Please update the .env.production file with your actual backend URL"
+fi
+
+# Install dependencies
+print_status "Installing frontend dependencies..."
+npm install
+
+# Run type check
+print_status "Running TypeScript type check..."
+npm run type-check
+
+# Run linting
+print_status "Running ESLint..."
+npm run lint
+
+# Build for production
+print_status "Building frontend for production..."
+npm run build:production
+
+print_success "Frontend build completed"
+
+# Create build summary
+cd ..
+print_status "Creating build summary..."
+
+cat > BUILD_SUMMARY.md << EOF
+# 🎉 Bonded Production Build Summary
+
+## Build Information
+- **Date:** $(date)
+- **Version:** 1.0.0
+- **Status:** ✅ Success
+
+## Backend
+- **Framework:** Django 5.2.3
+- **Database:** PostgreSQL
+- **Authentication:** JWT
+- **Media Storage:** Cloudinary
+- **Status:** ✅ Ready for deployment
+
+## Frontend
+- **Framework:** React 19.1.0
+- **Language:** TypeScript 4.9.5
+- **UI Library:** Material-UI 7.1.2
+- **Build Size:** $(du -sh frontend/build | cut -f1)
+- **Status:** ✅ Ready for deployment
+
+## Next Steps
+1. Update environment variables in .env files
+2. Deploy backend to your chosen platform
+3. Deploy frontend to your chosen platform
+4. Test all functionality
+5. Monitor performance and logs
+
+## Deployment Options
+- **Heroku:** See BUILD_GUIDE.md for detailed instructions
+- **Railway:** See BUILD_GUIDE.md for detailed instructions
+- **Vercel:** See BUILD_GUIDE.md for detailed instructions
+
+## Files Created/Modified
+- \`backend/settings_production.py\` - Production Django settings
+- \`backend/requirements_production.txt\` - Production dependencies
+- \`backend/Procfile\` - Heroku deployment configuration
+- \`backend/runtime.txt\` - Python version specification
+- \`backend/manage_production.py\` - Production management script
+- \`frontend/env.production\` - Production environment variables
+- \`frontend/build/\` - Production build files
+- \`BUILD_GUIDE.md\` - Comprehensive deployment guide
+
+---
+Generated by Bonded Build Script
+EOF
+
+print_success "Build summary created: BUILD_SUMMARY.md"
+
+# Final status
+echo ""
+print_success "🎉 Production build completed successfully!"
+echo ""
+print_status "Next steps:"
+echo "  1. Review and update environment variables"
+echo "  2. Deploy backend using your chosen platform"
+echo "  3. Deploy frontend using your chosen platform"
+echo "  4. Test all functionality"
+echo ""
+print_status "For detailed deployment instructions, see: BUILD_GUIDE.md"
+echo "" 
