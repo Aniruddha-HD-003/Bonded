@@ -22,6 +22,7 @@ ALLOWED_HOSTS = [
     '.herokuapp.com',
     '.vercel.app',
     '.railway.app',
+    '.onrender.com'
     # Add your production domain here
 ]
 

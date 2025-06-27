@@ -156,7 +156,9 @@ REST_FRAMEWORK = {
 }
 
 # CORS
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://bonded.onrender.com",  # Replace with your actual frontend Render URL
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
