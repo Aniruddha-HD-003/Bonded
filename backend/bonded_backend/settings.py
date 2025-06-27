@@ -157,7 +157,8 @@ REST_FRAMEWORK = {
 
 # CORS
 CORS_ALLOWED_ORIGINS = [
-    "https://bonded.onrender.com",  # Replace with your actual frontend Render URL
+    "https://bonded.onrender.com",
+    "https://bonded-1.onrender.com",  # Replace with your actual frontend Render URL
 ]
 
 # Default primary key field type
