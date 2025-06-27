@@ -29,16 +29,8 @@ ALLOWED_HOSTS = [
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'bonded_db'),
-        'USER': os.environ.get('DB_USER', 'bonded_user'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'bonded_pass'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-    }
+    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 STATIC_URL = '/static/'
