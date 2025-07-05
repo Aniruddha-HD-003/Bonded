@@ -3,6 +3,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from .models import Reaction
 from .serializers import ReactionSerializer
+from rest_framework.views import APIView
 
 # Create your views here.
 
@@ -20,3 +21,12 @@ class ReactionListCreateView(generics.ListCreateAPIView):
         # Remove existing reaction by this user for this post (enforce one reaction per user per post)
         Reaction.objects.filter(user=user, post_id=post_id).delete()
         serializer.save(user=user, post_id=post_id)
+
+    def delete(self, request, *args, **kwargs):
+        post_id = self.kwargs.get('post_id')
+        user = request.user
+        deleted, _ = Reaction.objects.filter(user=user, post_id=post_id).delete()
+        if deleted:
+            return Response({'detail': 'Reaction removed.'}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'detail': 'No reaction to remove.'}, status=status.HTTP_404_NOT_FOUND)

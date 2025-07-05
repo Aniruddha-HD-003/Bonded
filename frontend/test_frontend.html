@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Environment Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>Frontend Environment Test</h1>
+    
+    <div class="test">
+        <h3>Environment Variables:</h3>
+        <p><strong>REACT_APP_API_URL:</strong> <span id="api-url">Loading...</span></p>
+        <p><strong>REACT_APP_ENVIRONMENT:</strong> <span id="env">Loading...</span></p>
+        <p><strong>REACT_APP_VERSION:</strong> <span id="version">Loading...</span></p>
+    </div>
+
+    <div class="test">
+        <h3>Backend Connection Test:</h3>
+        <button onclick="testBackend()">Test Backend Connection</button>
+        <div id="backend-result"></div>
+    </div>
+
+    <script>
+        // Test environment variables
+        document.getElementById('api-url').textContent = process.env.REACT_APP_API_URL || 'Not set';
+        document.getElementById('env').textContent = process.env.REACT_APP_ENVIRONMENT || 'Not set';
+        document.getElementById('version').textContent = process.env.REACT_APP_VERSION || 'Not set';
+
+        async function testBackend() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/users/register-group/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        group_name: 'Test Frontend Connection',
+                        num_people: 2
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `<div class="success">✅ Backend connection successful!<br>Created group: ${data.group}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Backend responded with status: ${response.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Backend connection failed: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html> 

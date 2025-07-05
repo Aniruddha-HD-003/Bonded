@@ -49,6 +49,7 @@ import {
   Build as BuildIcon
 } from '@mui/icons-material';
 import apiClient from './config/api';
+import BondedLogo from './components/BondedLogo';
 
 // Group context to provide memberships and selected group
 type Membership = {
@@ -59,6 +60,9 @@ type Membership = {
 };
 const GroupContext = createContext<any>(null);
 
+// Auth context to manage authentication state
+const AuthContext = createContext<any>(null);
+
 function GroupProvider({ children }: { children: React.ReactNode }) {
   const [memberships, setMemberships] = useState<Membership[]>(() => {
     const m = localStorage.getItem('memberships');
@@ -68,6 +72,12 @@ function GroupProvider({ children }: { children: React.ReactNode }) {
     const sg = localStorage.getItem('selectedGroup');
     return sg ? JSON.parse(sg) : null;
   });
+
+  useEffect(() => {
+    if (memberships.length > 0) {
+      localStorage.setItem('memberships', JSON.stringify(memberships));
+    }
+  }, [memberships]);
 
   useEffect(() => {
     if (selectedGroup) {
@@ -84,6 +94,28 @@ function GroupProvider({ children }: { children: React.ReactNode }) {
 
 function useGroup() {
   return useContext(GroupContext);
+}
+
+function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const login = () => setIsAuthenticated(true);
+  const logout = () => setIsAuthenticated(false);
+
+  return (
+    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+function useAuth() {
+  return useContext(AuthContext);
 }
 
 function GroupSelector() {
@@ -134,6 +166,205 @@ function GroupSelector() {
   );
 }
 
+function HomePage() {
+  const navigate = useNavigate();
+
+  return (
+    <Box sx={{ 
+      minHeight: 'calc(100vh - 140px)',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      p: 3,
+      mt: 2
+    }}>
+      <Container maxWidth="md">
+        <Box sx={{ textAlign: 'center', color: 'white' }}>
+          {/* Hero Section */}
+          <Box sx={{ mb: 6 }}>
+            <BondedLogo size={120} src="/Bonded.png" />
+            <Typography variant="h2" fontWeight="bold" sx={{ mt: 3, mb: 2 }}>
+              Welcome to Bonded
+            </Typography>
+            <Typography variant="h5" sx={{ opacity: 0.9, mb: 4 }}>
+              Your private social space for friends and memories
+            </Typography>
+            <Typography variant="body1" sx={{ opacity: 0.8, maxWidth: 600, mx: 'auto' }}>
+              Create exclusive groups, share moments, plan events, and stay connected with your closest friends in a secure, private environment.
+            </Typography>
+          </Box>
+
+          {/* Action Cards */}
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
+            gap: 4, 
+            maxWidth: 800, 
+            mx: 'auto' 
+          }}>
+            {/* Register Group Card */}
+            <Card sx={{ 
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 4,
+              p: 4,
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+              '&:hover': {
+                transform: 'translateY(-8px)',
+                background: 'rgba(255,255,255,0.15)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+              }
+            }} onClick={() => navigate('/onboarding')}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Box sx={{ 
+                  width: 80, 
+                  height: 80, 
+                  borderRadius: '50%', 
+                  background: 'linear-gradient(45deg, #4CAF50, #45a049)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 3,
+                  boxShadow: '0 8px 20px rgba(76, 175, 80, 0.3)'
+                }}>
+                  <GroupIcon sx={{ fontSize: 40, color: 'white' }} />
+                </Box>
+                <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
+                  Create New Group
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9, mb: 3 }}>
+                  Start a new private group for your friends, family, or team. Set up credentials and invite members.
+                </Typography>
+                <Button 
+                  variant="contained" 
+                  size="large"
+                  sx={{ 
+                    background: 'linear-gradient(45deg, #4CAF50 30%, #45a049 90%)',
+                    borderRadius: 3,
+                    px: 4,
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
+                    '&:hover': {
+                      background: 'linear-gradient(45deg, #45a049 30%, #4CAF50 90%)',
+                      boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
+                    }
+                  }}
+                >
+                  🚀 Get Started
+                </Button>
+              </Box>
+            </Card>
+
+            {/* Login Card */}
+            <Card sx={{ 
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 4,
+              p: 4,
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+              '&:hover': {
+                transform: 'translateY(-8px)',
+                background: 'rgba(255,255,255,0.15)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+              }
+            }} onClick={() => navigate('/login')}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Box sx={{ 
+                  width: 80, 
+                  height: 80, 
+                  borderRadius: '50%', 
+                  background: 'linear-gradient(45deg, #2196F3, #1976D2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 3,
+                  boxShadow: '0 8px 20px rgba(33, 150, 243, 0.3)'
+                }}>
+                  <DashboardIcon sx={{ fontSize: 40, color: 'white' }} />
+                </Box>
+                <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
+                  Sign In
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9, mb: 3 }}>
+                  Already have a group? Sign in with your credentials to access your social space.
+                </Typography>
+                <Button 
+                  variant="contained" 
+                  size="large"
+                  sx={{ 
+                    background: 'linear-gradient(45deg, #2196F3 30%, #1976D2 90%)',
+                    borderRadius: 3,
+                    px: 4,
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 15px rgba(33, 150, 243, 0.3)',
+                    '&:hover': {
+                      background: 'linear-gradient(45deg, #1976D2 30%, #2196F3 90%)',
+                      boxShadow: '0 6px 20px rgba(33, 150, 243, 0.4)'
+                    }
+                  }}
+                >
+                  🔐 Sign In
+                </Button>
+              </Box>
+            </Card>
+          </Box>
+
+          {/* Features Section */}
+          <Box sx={{ mt: 8 }}>
+            <Typography variant="h4" fontWeight="bold" sx={{ mb: 4 }}>
+              Why Choose Bonded?
+            </Typography>
+            <Box sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, 
+              gap: 3 
+            }}>
+              <Box sx={{ textAlign: 'center', p: 2 }}>
+                <SecurityIcon sx={{ fontSize: 40, mb: 2, opacity: 0.8 }} />
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
+                  Private & Secure
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                  Your group is completely private and secure with JWT authentication.
+                </Typography>
+              </Box>
+              <Box sx={{ textAlign: 'center', p: 2 }}>
+                <EventIcon sx={{ fontSize: 40, mb: 2, opacity: 0.8 }} />
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
+                  Plan Events
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                  Create and manage events, trips, and meetings with your group.
+                </Typography>
+              </Box>
+              <Box sx={{ textAlign: 'center', p: 2 }}>
+                <CommentIcon sx={{ fontSize: 40, mb: 2, opacity: 0.8 }} />
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
+                  Stay Connected
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                  Share posts, comments, and reactions with your group members.
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
+  );
+}
+
 function Onboarding() {
   const [groupName, setGroupName] = useState('');
   const [numPeople, setNumPeople] = useState(2);
@@ -147,7 +378,7 @@ function Onboarding() {
     setError('');
     setLoading(true);
     try {
-      const res = await apiClient.post('/api/users/register-group/', {
+      const res = await apiClient.post('/users/register-group/', {
         group_name: groupName,
         num_people: numPeople,
       });
@@ -160,7 +391,7 @@ function Onboarding() {
   };
 
   return (
-    <Box mt={4}>
+    <Box mt={2}>
       <Card sx={{ 
         maxWidth: 600, 
         mx: 'auto', 
@@ -168,19 +399,46 @@ function Onboarding() {
         color: 'white',
         borderRadius: 4,
         boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative'
       }}>
         <Box sx={{ 
           background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
           p: 4, 
-          textAlign: 'center'
+          position: 'relative'
         }}>
-          <Typography variant="h4" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>
-            🚀 Welcome to Bonded
-          </Typography>
-          <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
-            Create your social space for friends and memories
-          </Typography>
+          {/* Back to Home Button - Fixed position with dedicated space */}
+          <Box sx={{ 
+            position: 'absolute', 
+            top: 16, 
+            left: 16, 
+            zIndex: 1
+          }}>
+            <Button 
+              onClick={() => navigate('/')}
+              sx={{ 
+                color: 'white',
+                border: '1px solid rgba(255,255,255,0.3)',
+                '&:hover': { background: 'rgba(255,255,255,0.1)' }
+              }}
+            >
+              ← Back to Home
+            </Button>
+          </Box>
+          
+          {/* Main content with left margin to avoid overlap */}
+          <Box sx={{ 
+            textAlign: 'center',
+            ml: 8, // Add left margin to avoid overlap with back button
+            mr: 2  // Add right margin for balance
+          }}>
+            <Typography variant="h4" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>
+              🚀 Create Your Group
+            </Typography>
+            <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
+              Set up your private social space for friends and memories
+            </Typography>
+          </Box>
         </Box>
         <CardContent sx={{ p: 4 }}>
           {credentials ? (
@@ -325,28 +583,36 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { setMemberships } = useGroup();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const res = await apiClient.post('/api/users/group-login/', {
+      const res = await apiClient.post('/users/group-login/', {
         group,
         username,
         password,
       });
       if (res.data.must_change_credentials) {
+        console.log('Login: Must change credentials, redirecting to change-credentials');
         sessionStorage.setItem('pending_group', group);
         sessionStorage.setItem('pending_username', username);
         sessionStorage.setItem('pending_password', password);
         navigate('/change-credentials');
       } else if (res.data.access) {
+        console.log('Login: Success! Storing tokens and redirecting to dashboard');
         localStorage.setItem('access', res.data.access);
         localStorage.setItem('refresh', res.data.refresh);
         localStorage.setItem('memberships', JSON.stringify(res.data.memberships));
+        setMemberships(res.data.memberships);
+        login(); // Update authentication state
+        console.log('Login: Stored memberships:', res.data.memberships);
         navigate('/dashboard');
       } else {
+        console.log('Login: Unknown response:', res.data);
         setError('Unknown response from server.');
       }
     } catch (err: any) {
@@ -365,7 +631,7 @@ function Login() {
   };
 
   return (
-    <Box mt={4}>
+    <Box mt={2}>
       <Card sx={{ 
         maxWidth: 500, 
         mx: 'auto', 
@@ -373,19 +639,46 @@ function Login() {
         color: 'white',
         borderRadius: 4,
         boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative'
       }}>
         <Box sx={{ 
           background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
           p: 4, 
-          textAlign: 'center'
+          position: 'relative'
         }}>
-          <Typography variant="h4" gutterBottom fontWeight="bold">
-            🔐 Welcome Back
-          </Typography>
-          <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
-            Sign in to your group space
-          </Typography>
+          {/* Back to Home Button - Fixed position with dedicated space */}
+          <Box sx={{ 
+            position: 'absolute', 
+            top: 16, 
+            left: 16, 
+            zIndex: 1
+          }}>
+            <Button 
+              onClick={() => navigate('/')}
+              sx={{ 
+                color: 'white',
+                border: '1px solid rgba(255,255,255,0.3)',
+                '&:hover': { background: 'rgba(255,255,255,0.1)' }
+              }}
+            >
+              ← Back to Home
+            </Button>
+          </Box>
+          
+          {/* Main content with left margin to avoid overlap */}
+          <Box sx={{ 
+            textAlign: 'center',
+            ml: 8, // Add left margin to avoid overlap with back button
+            mr: 2  // Add right margin for balance
+          }}>
+            <Typography variant="h4" gutterBottom fontWeight="bold">
+              🔐 Welcome Back
+            </Typography>
+            <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
+              Sign in to your group space
+            </Typography>
+          </Box>
         </Box>
         <CardContent sx={{ p: 4 }}>
           <form onSubmit={handleSubmit}>
@@ -495,7 +788,7 @@ function CredentialChange() {
     setError('');
     setLoading(true);
     try {
-      await apiClient.post('/api/users/change-credentials/', {
+      await apiClient.post('/users/change-credentials/', {
         group: pendingGroup,
         username: pendingUsername,
         new_username: newUsername,
@@ -533,7 +826,7 @@ function CredentialChange() {
   }
 
   return (
-    <Box mt={4}>
+    <Box mt={2}>
       <Paper sx={{ p: 4, maxWidth: 400, mx: 'auto' }}>
         <Typography variant="h5" gutterBottom>Set Your Username & Password</Typography>
         {success ? (
@@ -578,7 +871,7 @@ function Comments({ postId }: { postId: number }) {
   const [loading, setLoading] = useState(false);
 
   const fetchComments = useCallback(() => {
-    apiClient.get(`/api/comments/post/${postId}/`)
+    apiClient.get(`/comments/post/${postId}/`)
       .then((res: any) => setComments(res.data))
       .catch(() => setComments([]));
   }, [postId]);
@@ -592,7 +885,7 @@ function Comments({ postId }: { postId: number }) {
     if (!newComment.trim()) return;
     setLoading(true);
     try {
-      await apiClient.post(`/api/comments/post/${postId}/`, {
+      await apiClient.post(`/comments/post/${postId}/`, {
         text: newComment
       });
       setNewComment('');
@@ -696,7 +989,7 @@ function Reactions({ postId, currentUser }: { postId: number; currentUser: strin
   const [userReaction, setUserReaction] = useState<string | null>(null);
 
   const fetchReactions = useCallback(() => {
-    apiClient.get(`/api/reactions/post/${postId}/`)
+    apiClient.get(`/reactions/post/${postId}/`)
       .then((res: any) => {
         setReactions(res.data);
         const userReact = res.data.find((r: any) => r.user_username === currentUser);
@@ -713,11 +1006,11 @@ function Reactions({ postId, currentUser }: { postId: number; currentUser: strin
     try {
       if (userReaction === type) {
         // Remove reaction
-        await apiClient.delete(`/api/reactions/post/${postId}/`);
+        await apiClient.delete(`/reactions/post/${postId}/`);
         setUserReaction(null);
       } else {
         // Add/change reaction
-        await apiClient.post(`/api/reactions/post/${postId}/`, { type });
+        await apiClient.post(`/reactions/post/${postId}/`, { type });
         setUserReaction(type);
       }
       fetchReactions();
@@ -793,15 +1086,15 @@ function Dashboard() {
     if (!selectedGroup) return;
     setLoading(true);
     // Fetch group members
-    apiClient.get(`/api/users/groups/${selectedGroup.group_id}/members/`)
+    apiClient.get(`/users/groups/${selectedGroup.group_id}/members/`)
       .then((res: any) => setMembers(res.data.members))
       .catch(() => setMembers([]));
     // Fetch posts
-    apiClient.get(`/api/posts/?group=${selectedGroup.group_id}`)
+    apiClient.get(`/posts/?group=${selectedGroup.group_id}`)
       .then((res: any) => setPosts(res.data))
       .catch(() => setPosts([]));
     // Fetch events
-    apiClient.get(`/api/events/?group=${selectedGroup.group_id}`)
+    apiClient.get(`/events/?group=${selectedGroup.group_id}`)
       .then((res: any) => setEvents(res.data))
       .catch(() => setEvents([]))
       .finally(() => setLoading(false));
@@ -821,7 +1114,7 @@ function Dashboard() {
     }
     try {
       await apiClient.post(
-        '/api/posts/',
+        '/posts/',
         { text: newPost, group: selectedGroup.group_id }
       );
       setNewPost('');
@@ -840,7 +1133,7 @@ function Dashboard() {
     }
     try {
       await apiClient.post(
-        '/api/events/',
+        '/events/',
         {
           title: newEventTitle,
           type: newEventType,
@@ -1211,12 +1504,17 @@ function Events() {
 
 function LogoutButton() {
   const navigate = useNavigate();
+  const { setMemberships, setSelectedGroup } = useGroup();
+  const { logout } = useAuth();
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('access');
     localStorage.removeItem('refresh');
     localStorage.removeItem('memberships');
     localStorage.removeItem('selectedGroup');
-    navigate('/login');
+    setMemberships([]);
+    setSelectedGroup(null);
+    logout(); // Update authentication state
+    navigate('/');
   };
   return (
     <Button 
@@ -1244,12 +1542,26 @@ function LogoutButton() {
 
 function AuthGate() {
   const navigate = useNavigate();
+  const location = window.location.pathname;
+  
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
+    const token = localStorage.getItem('access');
+    console.log('AuthGate: Checking token:', token ? 'Token exists' : 'No token found');
+    console.log('AuthGate: Current location:', location);
+    
+    // Allow access to public routes without token
+    if (location === '/' || location === '/onboarding' || location === '/login' || location === '/change-credentials') {
+      console.log('AuthGate: Allowing access to public routes');
+      return;
     }
-  }, [navigate]);
+    
+    if (!token) {
+      console.log('AuthGate: No token, redirecting to home');
+      navigate('/');
+    } else {
+      console.log('AuthGate: Token found, staying on current page');
+    }
+  }, [navigate, location]);
   return null;
 }
 
@@ -1948,20 +2260,27 @@ POST /api/reactions/post/1/
   );
 }
 
-function App() {
+function AppContent() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <GroupProvider>
       <Router>
         <AuthGate />
         <CssBaseline />
-        <AppBar position="static" sx={{ 
+        <AppBar position="fixed" sx={{ 
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          zIndex: (theme) => theme.zIndex.drawer + 1
         }}>
           <Toolbar>
             <Box display="flex" alignItems="center">
-              <Typography variant="h6" fontWeight="bold" sx={{ mr: 1 }}>
-                🚀 Bonded
+              <BondedLogo 
+                size={40} 
+                src="/Bonded.png" // Your logo is now in the public folder
+              />
+              <Typography variant="h6" fontWeight="bold" sx={{ mr: 1, ml: 1 }}>
+                Bonded
               </Typography>
               <Typography variant="subtitle2" sx={{ opacity: 0.8 }}>
                 Social Platform
@@ -1969,13 +2288,17 @@ function App() {
             </Box>
             <Box sx={{ flexGrow: 1 }} />
             <Documentation />
-            <LogoutButton />
+            {isAuthenticated && <LogoutButton />}
           </Toolbar>
         </AppBar>
-        <Container sx={{ mt: 4, mb: 4 }}>
+        
+        {/* Spacer to prevent content from being hidden behind fixed header */}
+        <Toolbar />
+        
+        <Container sx={{ mt: 4, mb: 8, minHeight: 'calc(100vh - 140px)' }}>
           <GroupSelector />
           <Routes>
-            <Route path="/" element={<Navigate to="/onboarding" />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/login" element={<Login />} />
             <Route path="/change-credentials" element={<CredentialChange />} />
@@ -1984,8 +2307,54 @@ function App() {
             <Route path="/events" element={<Events />} />
           </Routes>
         </Container>
+        
+        {/* Fixed Footer */}
+        <Box
+          component="footer"
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+            color: 'white',
+            py: 1,
+            px: 2,
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+            borderTop: '1px solid rgba(255,255,255,0.1)'
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 1
+            }}>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Bonded Social Platform
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                © 2025 Aniruddha H D. All rights reserved.
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.7 }}>
+                Version 1.0.0
+              </Typography>
+            </Box>
+          </Container>
+        </Box>
       </Router>
-    </GroupProvider>
+      </GroupProvider>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
