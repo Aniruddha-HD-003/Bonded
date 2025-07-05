@@ -132,15 +132,17 @@ See [BUILD_GUIDE.md](BUILD_GUIDE.md) for detailed production deployment instruct
 
 ## 🚀 Deployment Options
 
-### Backend Deployment
+### Render Deployment (Recommended)
+- **Complete guide**: [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md)
+- **Quick setup**: Run `./setup-render-env.sh` to generate environment variables
+- **Test connection**: Use `node test-api-connection.js <your-backend-url>`
+
+### Other Deployment Options
 - **Heroku** - Easy deployment with PostgreSQL add-on
 - **Railway** - Automatic deployment from GitHub
 - **DigitalOcean** - VPS deployment with Docker
-
-### Frontend Deployment
 - **Vercel** - Optimized for React applications
 - **Netlify** - Static site hosting
-- **Heroku** - Full-stack deployment
 
 ## 🧪 Testing
 

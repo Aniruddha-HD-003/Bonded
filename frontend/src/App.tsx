@@ -48,7 +48,7 @@ import {
   Api as ApiIcon,
   Build as BuildIcon
 } from '@mui/icons-material';
-import axios from 'axios';
+import apiClient from './config/api';
 
 // Group context to provide memberships and selected group
 type Membership = {
@@ -147,7 +147,7 @@ function Onboarding() {
     setError('');
     setLoading(true);
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/users/register-group/', {
+      const res = await apiClient.post('/api/users/register-group/', {
         group_name: groupName,
         num_people: numPeople,
       });
@@ -331,7 +331,7 @@ function Login() {
     setError('');
     setLoading(true);
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/users/group-login/', {
+      const res = await apiClient.post('/api/users/group-login/', {
         group,
         username,
         password,
@@ -495,7 +495,7 @@ function CredentialChange() {
     setError('');
     setLoading(true);
     try {
-      await axios.post('http://127.0.0.1:8000/api/users/change-credentials/', {
+      await apiClient.post('/api/users/change-credentials/', {
         group: pendingGroup,
         username: pendingUsername,
         new_username: newUsername,
@@ -578,8 +578,8 @@ function Comments({ postId }: { postId: number }) {
   const [loading, setLoading] = useState(false);
 
   const fetchComments = useCallback(() => {
-    authAxios().get(`http://127.0.0.1:8000/api/comments/post/${postId}/`)
-      .then(res => setComments(res.data))
+    apiClient.get(`/api/comments/post/${postId}/`)
+      .then((res: any) => setComments(res.data))
       .catch(() => setComments([]));
   }, [postId]);
 
@@ -592,7 +592,7 @@ function Comments({ postId }: { postId: number }) {
     if (!newComment.trim()) return;
     setLoading(true);
     try {
-      await authAxios().post(`http://127.0.0.1:8000/api/comments/post/${postId}/`, {
+      await apiClient.post(`/api/comments/post/${postId}/`, {
         text: newComment
       });
       setNewComment('');
@@ -696,8 +696,8 @@ function Reactions({ postId, currentUser }: { postId: number; currentUser: strin
   const [userReaction, setUserReaction] = useState<string | null>(null);
 
   const fetchReactions = useCallback(() => {
-    authAxios().get(`http://127.0.0.1:8000/api/reactions/post/${postId}/`)
-      .then(res => {
+    apiClient.get(`/api/reactions/post/${postId}/`)
+      .then((res: any) => {
         setReactions(res.data);
         const userReact = res.data.find((r: any) => r.user_username === currentUser);
         setUserReaction(userReact ? userReact.type : null);
@@ -713,11 +713,11 @@ function Reactions({ postId, currentUser }: { postId: number; currentUser: strin
     try {
       if (userReaction === type) {
         // Remove reaction
-        await authAxios().delete(`http://127.0.0.1:8000/api/reactions/post/${postId}/`);
+        await apiClient.delete(`/api/reactions/post/${postId}/`);
         setUserReaction(null);
       } else {
         // Add/change reaction
-        await authAxios().post(`http://127.0.0.1:8000/api/reactions/post/${postId}/`, { type });
+        await apiClient.post(`/api/reactions/post/${postId}/`, { type });
         setUserReaction(type);
       }
       fetchReactions();
@@ -793,16 +793,16 @@ function Dashboard() {
     if (!selectedGroup) return;
     setLoading(true);
     // Fetch group members
-    authAxios().get(`http://127.0.0.1:8000/api/users/groups/${selectedGroup.group_id}/members/`)
-      .then(res => setMembers(res.data.members))
+    apiClient.get(`/api/users/groups/${selectedGroup.group_id}/members/`)
+      .then((res: any) => setMembers(res.data.members))
       .catch(() => setMembers([]));
     // Fetch posts
-    authAxios().get(`http://127.0.0.1:8000/api/posts/?group=${selectedGroup.group_id}`)
-      .then(res => setPosts(res.data))
+    apiClient.get(`/api/posts/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setPosts(res.data))
       .catch(() => setPosts([]));
     // Fetch events
-    authAxios().get(`http://127.0.0.1:8000/api/events/?group=${selectedGroup.group_id}`)
-      .then(res => setEvents(res.data))
+    apiClient.get(`/api/events/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setEvents(res.data))
       .catch(() => setEvents([]))
       .finally(() => setLoading(false));
   };
@@ -820,8 +820,8 @@ function Dashboard() {
       return;
     }
     try {
-      await authAxios().post(
-        'http://127.0.0.1:8000/api/posts/',
+      await apiClient.post(
+        '/api/posts/',
         { text: newPost, group: selectedGroup.group_id }
       );
       setNewPost('');
@@ -839,8 +839,8 @@ function Dashboard() {
       return;
     }
     try {
-      await authAxios().post(
-        'http://127.0.0.1:8000/api/events/',
+      await apiClient.post(
+        '/api/events/',
         {
           title: newEventTitle,
           type: newEventType,
@@ -1207,34 +1207,7 @@ function Events() {
   return <div>Events Page</div>;
 }
 
-// Axios interceptor for 401
-axios.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('access');
-      localStorage.removeItem('refresh');
-      localStorage.removeItem('memberships');
-      localStorage.removeItem('selectedGroup');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
 
-// Helper for authenticated API calls
-function authAxios() {
-  const token = localStorage.getItem('token');
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
-  
-  return axios.create({
-    baseURL: apiUrl,
-    headers: {
-      'Authorization': token ? `Bearer ${token}` : '',
-      'Content-Type': 'application/json',
-    }
-  });
-}
 
 function LogoutButton() {
   const navigate = useNavigate();
