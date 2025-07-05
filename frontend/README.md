@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+# Bonded Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is the frontend application for the Bonded social platform, built with React and TypeScript.
 
 ## Available Scripts
 

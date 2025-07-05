@@ -132,15 +132,17 @@ See [BUILD_GUIDE.md](BUILD_GUIDE.md) for detailed production deployment instruct
 
 ## 🚀 Deployment Options
 
-### Backend Deployment
+### Render Deployment (Recommended)
+- **Complete guide**: [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md)
+- **Quick setup**: Run `./setup-render-env.sh` to generate environment variables
+- **Test connection**: Use `node test-api-connection.js <your-backend-url>`
+
+### Other Deployment Options
 - **Heroku** - Easy deployment with PostgreSQL add-on
 - **Railway** - Automatic deployment from GitHub
 - **DigitalOcean** - VPS deployment with Docker
-
-### Frontend Deployment
 - **Vercel** - Optimized for React applications
 - **Netlify** - Static site hosting
-- **Heroku** - Full-stack deployment
 
 ## 🧪 Testing
 
@@ -203,7 +205,11 @@ REACT_APP_VERSION=1.0.0
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Copyright (c) 2025 Aniruddha H D
+
+This source code is proprietary and confidential.
+No part of this codebase may be copied, modified, distributed, or used in any form
+without explicit written permission from the author.
 
 ## 🆘 Support
 

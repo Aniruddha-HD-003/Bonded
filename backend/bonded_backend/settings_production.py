@@ -23,7 +23,7 @@ ALLOWED_HOSTS = [
     '.herokuapp.com',
     '.vercel.app',
     '.railway.app',
-    '.onrender.com'
+    '.onrender.com',
     # Add your production domain here
 ]
 
@@ -56,7 +56,10 @@ SECURE_HSTS_PRELOAD = True
 
 # CORS settings for production
 CORS_ALLOWED_ORIGINS = [
- 
+    "https://bonded-1.com",
+    "https://www.bonded-1.com",
+    "https://bonded-1.onrender.com",
+    "https://www.bonded-1.onrender.com",
     # Add your frontend domain here
 ]
 

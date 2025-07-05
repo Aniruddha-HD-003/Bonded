@@ -72,6 +72,7 @@ Thumbs.db
 .env.local
 .env.production
 .env.staging
+.env.render
 
 # Database
 *.db
