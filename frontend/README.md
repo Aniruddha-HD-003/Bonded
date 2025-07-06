@@ -1,4 +1,4 @@
-# Bonded Frontend v1.0.1
+# Bonded Frontend v1.1.0
 
 A modern, responsive React frontend for the Bonded social platform - a private social networking application designed for groups of friends to share memories, plan events, and stay connected in a secure environment.
 
@@ -11,7 +11,10 @@ A modern, responsive React frontend for the Bonded social platform - a private s
 - **Group selector** - Switch between different groups seamlessly
 
 ### 📝 Content Creation & Interaction
-- **Posts** - Share text content with your group members
+- **Posts** - Share text, photos, and videos with your group members
+- **Media Upload** - Support for images (JPG, PNG, GIF, WebP) and videos (MP4, AVI, MOV, WebM)
+- **File Validation** - Automatic file type and size validation (50MB max)
+- **Media Preview** - Real-time preview before posting
 - **Events** - Plan trips, goals, and meetings with different event types
 - **Comments** - Engage with posts through threaded comments
 - **Reactions** - React with emojis (like, love, laugh, wow, sad, angry)
@@ -320,4 +323,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Bonded Frontend v1.0.1** - Building stronger connections through private social spaces.
+**Bonded Frontend v1.1.0** - Building stronger connections through private social spaces with rich media sharing.

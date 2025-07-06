@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
 from .models import Post
 from .serializers import PostSerializer
 from users.models import Group, GroupMembership
@@ -36,3 +37,32 @@ class PostListCreateView(generics.ListCreateAPIView):
         if not GroupMembership.objects.filter(user=user, group=group).exists():
             raise serializers.ValidationError({'group': 'You are not a member of this group.'})
         serializer.save(author=user, group=group)
+
+class PostDetailView(generics.RetrieveDestroyAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Post.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        # Users can only access posts from groups they're members of
+        user_groups = GroupMembership.objects.filter(user=user).values_list('group', flat=True)
+        return Post.objects.filter(group__in=user_groups)
+
+    def destroy(self, request, *args, **kwargs):
+        post = self.get_object()
+        user = request.user
+        
+        # Check if user is the author of the post
+        if post.author != user:
+            return Response(
+                {'error': 'You can only delete your own posts.'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Delete the post (this will cascade delete related comments, reactions, etc.)
+        post.delete()
+        return Response(
+            {'message': 'Post deleted successfully.'}, 
+            status=status.HTTP_204_NO_CONTENT
+        )

@@ -46,7 +46,11 @@ import {
   Storage as StorageIcon,
   Security as SecurityIcon,
   Api as ApiIcon,
-  Build as BuildIcon
+  Build as BuildIcon,
+  Image as ImageIcon,
+  VideoLibrary as VideoIcon,
+  AttachFile as AttachFileIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import apiClient from './config/api';
 import BondedLogo from './components/BondedLogo';
@@ -1076,11 +1080,15 @@ function Dashboard() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [newPost, setNewPost] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const [postError, setPostError] = useState('');
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventType, setNewEventType] = useState('trip');
   const [newEventStartTime, setNewEventStartTime] = useState('');
   const [eventError, setEventError] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<any>(null);
 
   const fetchData = () => {
     if (!selectedGroup) return;
@@ -1108,20 +1116,70 @@ function Dashboard() {
   const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPostError('');
-    if (!newPost.trim()) {
-      setPostError('Post cannot be empty.');
+    
+    // Validate that either text or file is provided
+    if (!newPost.trim() && !selectedFile) {
+      setPostError('Please add some text or upload a photo/video.');
       return;
     }
+    
     try {
-      await apiClient.post(
-        '/posts/',
-        { text: newPost, group: selectedGroup.group_id }
-      );
+      const formData = new FormData();
+      formData.append('text', newPost);
+      formData.append('group', selectedGroup.group_id.toString());
+      
+      if (selectedFile) {
+        formData.append('media', selectedFile);
+      }
+      
+      await apiClient.post('/posts/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      // Reset form
       setNewPost('');
+      setSelectedFile(null);
+      setFilePreview(null);
       fetchData();
     } catch (err: any) {
       setPostError(err.response?.data?.error || 'Failed to create post.');
     }
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/avi', 'video/mov', 'video/webm'];
+      if (!allowedTypes.includes(file.type)) {
+        setPostError('Please select a valid image or video file.');
+        return;
+      }
+      
+      // Validate file size (50MB max)
+      const maxSize = 50 * 1024 * 1024; // 50MB
+      if (file.size > maxSize) {
+        setPostError('File size must be under 50MB.');
+        return;
+      }
+      
+      setSelectedFile(file);
+      setPostError('');
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFilePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
   };
 
   const handleEventSubmit = async (e: React.FormEvent) => {
@@ -1148,6 +1206,31 @@ function Dashboard() {
     } catch (err: any) {
       setEventError(err.response?.data?.error || 'Failed to create event.');
     }
+  };
+
+  const handleDeletePost = (post: any) => {
+    setPostToDelete(post);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeletePost = async () => {
+    if (!postToDelete) return;
+    
+    try {
+      await apiClient.delete(`/posts/${postToDelete.id}/`);
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
+      fetchData(); // Refresh posts
+    } catch (err: any) {
+      console.error('Failed to delete post:', err);
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
+    }
+  };
+
+  const cancelDeletePost = () => {
+    setDeleteDialogOpen(false);
+    setPostToDelete(null);
   };
 
   if (!selectedGroup) {
@@ -1269,7 +1352,8 @@ function Dashboard() {
                 border: '1px solid rgba(255,255,255,0.2)'
               }}>
                 <CardContent>
-                  <Box component="form" onSubmit={handlePostSubmit} sx={{ display: 'flex', gap: 1 }}>
+                  <Box component="form" onSubmit={handlePostSubmit}>
+                    {/* Text Input */}
                     <TextField
                       label="Share something..."
                       value={newPost}
@@ -1278,6 +1362,7 @@ function Dashboard() {
                       multiline
                       rows={2}
                       sx={{ 
+                        mb: 2,
                         '& .MuiOutlinedInput-root': {
                           backgroundColor: 'rgba(255,255,255,0.1)',
                           color: 'white',
@@ -1289,23 +1374,99 @@ function Dashboard() {
                         '& .MuiInputBase-input': { color: 'white' }
                       }}
                     />
-                    <Button 
-                      type="submit" 
-                      variant="contained" 
-                      sx={{ 
-                        background: 'linear-gradient(45deg, #4CAF50 30%, #45a049 90%)',
-                        borderRadius: 2,
-                        px: 3,
-                        minWidth: 'fit-content',
-                        boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
-                        '&:hover': {
-                          background: 'linear-gradient(45deg, #45a049 30%, #4CAF50 90%)',
-                          boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
-                        }
-                      }}
-                    >
-                      Post
-                    </Button>
+                    
+                    {/* File Preview */}
+                    {filePreview && (
+                      <Box sx={{ mb: 2, position: 'relative' }}>
+                        {selectedFile?.type.startsWith('image/') ? (
+                          <img 
+                            src={filePreview} 
+                            alt="Preview" 
+                            style={{ 
+                              maxWidth: '100%', 
+                              maxHeight: '300px', 
+                              borderRadius: '8px',
+                              objectFit: 'cover'
+                            }} 
+                          />
+                        ) : (
+                          <video 
+                            src={filePreview} 
+                            controls 
+                            style={{ 
+                              maxWidth: '100%', 
+                              maxHeight: '300px', 
+                              borderRadius: '8px'
+                            }} 
+                          />
+                        )}
+                        <Button
+                          onClick={removeFile}
+                          sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            minWidth: 'auto',
+                            width: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            color: 'white',
+                            '&:hover': {
+                              backgroundColor: 'rgba(0,0,0,0.9)',
+                            }
+                          }}
+                        >
+                          ×
+                        </Button>
+                      </Box>
+                    )}
+                    
+                    {/* Action Buttons */}
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      <input
+                        accept="image/*,video/*"
+                        style={{ display: 'none' }}
+                        id="file-upload"
+                        type="file"
+                        onChange={handleFileSelect}
+                      />
+                      <label htmlFor="file-upload">
+                        <Button
+                          component="span"
+                          variant="outlined"
+                          startIcon={<AttachFileIcon />}
+                          sx={{ 
+                            borderColor: 'rgba(255,255,255,0.3)',
+                            color: 'white',
+                            '&:hover': {
+                              borderColor: 'white',
+                              backgroundColor: 'rgba(255,255,255,0.1)'
+                            }
+                          }}
+                        >
+                          {selectedFile ? 'Change File' : 'Add Photo/Video'}
+                        </Button>
+                      </label>
+                      
+                      <Button 
+                        type="submit" 
+                        variant="contained" 
+                        sx={{ 
+                          background: 'linear-gradient(45deg, #4CAF50 30%, #45a049 90%)',
+                          borderRadius: 2,
+                          px: 3,
+                          minWidth: 'fit-content',
+                          boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
+                          '&:hover': {
+                            background: 'linear-gradient(45deg, #45a049 30%, #4CAF50 90%)',
+                            boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
+                          }
+                        }}
+                      >
+                        Post
+                      </Button>
+                    </Box>
                   </Box>
                 </CardContent>
               </Card>
@@ -1329,11 +1490,53 @@ function Dashboard() {
                       borderRadius: 2,
                       border: '1px solid rgba(255,255,255,0.2)'
                     }}>
-                      <CardContent>
+                                          <CardContent>
+                      {/* Post Text */}
+                      {p.text && (
                         <Typography variant="body1" sx={{ mb: 2, color: 'white' }}>
                           {p.text}
                         </Typography>
-                        <Box display="flex" alignItems="center" mb={2}>
+                      )}
+                      
+                      {/* Post Media */}
+                      {p.media_url && (
+                        <Box sx={{ mb: 2, borderRadius: 2, overflow: 'hidden' }}>
+                          {p.media_type === 'image' ? (
+                            <img 
+                              src={p.media_url} 
+                              alt="Post content" 
+                              style={{ 
+                                width: '100%', 
+                                maxHeight: '500px', 
+                                objectFit: 'cover',
+                                borderRadius: '8px'
+                              }} 
+                              onError={(e) => {
+                                console.error('Image failed to load:', p.media_url);
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          ) : p.media_type === 'video' ? (
+                            <video 
+                              src={p.media_url} 
+                              controls 
+                              style={{ 
+                                width: '100%', 
+                                maxHeight: '500px',
+                                borderRadius: '8px'
+                              }} 
+                              onError={(e) => {
+                                console.error('Video failed to load:', p.media_url);
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          ) : null}
+                        </Box>
+                      )}
+                      
+                      {/* Post Meta */}
+                      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                        <Box display="flex" alignItems="center">
                           <Avatar sx={{ 
                             mr: 1, 
                             width: 24, 
@@ -1347,9 +1550,31 @@ function Dashboard() {
                             {p.author_username} • {new Date(p.created_at).toLocaleString()}
                           </Typography>
                         </Box>
-                        <Reactions postId={p.id} currentUser={p.author_username} />
-                        <Comments postId={p.id} />
-                      </CardContent>
+                        
+                        {/* Delete Button - Only show for post author */}
+                        {p.author_username === selectedGroup.username && (
+                          <Button
+                            onClick={() => handleDeletePost(p)}
+                            size="small"
+                            sx={{
+                              minWidth: 'auto',
+                              width: 32,
+                              height: 32,
+                              borderRadius: '50%',
+                              backgroundColor: 'rgba(244, 67, 54, 0.8)',
+                              color: 'white',
+                              '&:hover': {
+                                backgroundColor: 'rgba(244, 67, 54, 1)',
+                              }
+                            }}
+                          >
+                            <DeleteIcon sx={{ fontSize: 16 }} />
+                          </Button>
+                        )}
+                      </Box>
+                      <Reactions postId={p.id} currentUser={p.author_username} />
+                      <Comments postId={p.id} />
+                    </CardContent>
                     </Card>
                   ))}
                 </List>
@@ -1488,6 +1713,71 @@ function Dashboard() {
           </CardContent>
         </Card>
       </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={cancelDeletePost}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            maxWidth: 400,
+            width: '100%'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}>
+          <DeleteIcon />
+          Delete Post
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          <Typography variant="body1" gutterBottom>
+            Are you sure you want to delete this post?
+          </Typography>
+          {postToDelete && (
+            <Box sx={{ mt: 2, p: 2, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                "{postToDelete.text ? postToDelete.text.substring(0, 100) + (postToDelete.text.length > 100 ? '...' : '') : 'Media post'}"
+              </Typography>
+            </Box>
+          )}
+          <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+            This action cannot be undone. All comments and reactions will also be deleted.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, gap: 1 }}>
+          <Button 
+            onClick={cancelDeletePost}
+            variant="outlined"
+            sx={{ 
+              borderColor: 'rgba(0,0,0,0.2)',
+              '&:hover': {
+                borderColor: 'rgba(0,0,0,0.4)'
+              }
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={confirmDeletePost}
+            variant="contained"
+            sx={{ 
+              background: 'linear-gradient(45deg, #f44336 30%, #d32f2f 90%)',
+              '&:hover': {
+                background: 'linear-gradient(45deg, #d32f2f 30%, #f44336 90%)',
+              }
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
