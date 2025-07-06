@@ -11,9 +11,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / "../.env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -135,12 +138,12 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files (Cloudinary)
+# Media files configuration - Cloudinary only
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'your_cloud_name',
-    'API_KEY': 'your_api_key',
-    'API_SECRET': 'your_api_secret',
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'your_cloud_name'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', 'your_api_key'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'your_api_secret'),
 }
 MEDIA_URL = '/media/'
 
