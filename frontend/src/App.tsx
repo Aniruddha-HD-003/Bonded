@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, Link } from 'react-router-dom';
 import { 
   CssBaseline, 
   Container, 
@@ -31,7 +31,15 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  Tabs,
+  Tab,
+  CircularProgress,
+  LinearProgress,
+  MenuItem,
+  Checkbox,
+  IconButton,
+  DialogContentText
 } from '@mui/material';
 import { 
   Group as GroupIcon,
@@ -50,7 +58,24 @@ import {
   Image as ImageIcon,
   VideoLibrary as VideoIcon,
   AttachFile as AttachFileIcon,
-  Delete as DeleteIcon
+  Delete as DeleteIcon,
+  EmojiEvents as EmojiEventsIcon,
+  TrendingUp as TrendingUpIcon,
+  Leaderboard as LeaderboardIcon,
+  Star as StarIcon,
+  Timer as TimerIcon,
+  CheckCircle as CheckCircleIcon,
+  PlayArrow as PlayArrowIcon,
+  Add as AddIcon,
+  Poll as PollIcon,
+  RadioButtonUnchecked as RadioButtonUncheckedIcon,
+  RadioButtonChecked as RadioButtonCheckedIcon,
+  Memory as MemoryIcon,
+  Link as LinkIcon,
+  Psychology as PsychologyIcon,
+  QuestionAnswer as QuestionAnswerIcon,
+  CompareArrows as CompareArrowsIcon,
+  Create as CreateIcon
 } from '@mui/icons-material';
 import apiClient from './config/api';
 import BondedLogo from './components/BondedLogo';
@@ -1089,6 +1114,8 @@ function Dashboard() {
   const [eventError, setEventError] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<any>(null);
+  const [achievements, setAchievements] = useState<any[]>([]);
+  const [achievementsLoading, setAchievementsLoading] = useState(false);
 
   const fetchData = () => {
     if (!selectedGroup) return;
@@ -1111,6 +1138,15 @@ function Dashboard() {
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line
+  }, [selectedGroup]);
+
+  useEffect(() => {
+    if (!selectedGroup) return;
+    setAchievementsLoading(true);
+    apiClient.get(`/games/user-achievements/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setAchievements(res.data))
+      .catch(() => setAchievements([]))
+      .finally(() => setAchievementsLoading(false));
   }, [selectedGroup]);
 
   const handlePostSubmit = async (e: React.FormEvent) => {
@@ -1269,6 +1305,77 @@ function Dashboard() {
           <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
             Welcome back, {selectedGroup.username}! 🚀
           </Typography>
+        </CardContent>
+      </Card>
+
+      {/* Navigation Section */}
+      <Card sx={{ 
+        mb: 3, 
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        borderRadius: 3,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+      }}>
+        <CardContent>
+          <Typography variant="h6" fontWeight="bold" mb={2}>Quick Navigation</Typography>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Button
+              component={Link}
+              to="/games"
+              variant="contained"
+              startIcon={<EmojiEventsIcon />}
+              sx={{
+                background: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)',
+                borderRadius: 2,
+                px: 3,
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #f5576c 0%, #f093fb 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 25px rgba(245, 87, 108, 0.3)'
+                }
+              }}
+            >
+              Games & Challenges
+            </Button>
+            <Button
+              component={Link}
+              to="/posts"
+              variant="outlined"
+              startIcon={<PostAddIcon />}
+              sx={{
+                borderColor: 'rgba(255,255,255,0.3)',
+                color: 'white',
+                borderRadius: 2,
+                px: 3,
+                '&:hover': {
+                  borderColor: 'white',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  transform: 'translateY(-2px)'
+                }
+              }}
+            >
+              View All Posts
+            </Button>
+            <Button
+              component={Link}
+              to="/events"
+              variant="outlined"
+              startIcon={<EventIcon />}
+              sx={{
+                borderColor: 'rgba(255,255,255,0.3)',
+                color: 'white',
+                borderRadius: 2,
+                px: 3,
+                '&:hover': {
+                  borderColor: 'white',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  transform: 'translateY(-2px)'
+                }
+              }}
+            >
+              View All Events
+            </Button>
+          </Box>
         </CardContent>
       </Card>
 
@@ -1778,6 +1885,40 @@ function Dashboard() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* My Achievements Card */}
+      <Card sx={{ mb: 3, background: 'linear-gradient(135deg, #ffe259 0%, #ffa751 100%)', color: 'white', borderRadius: 3, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" mb={2}>
+            <EmojiEventsIcon sx={{ mr: 1, fontSize: 28 }} />
+            <Typography variant="h6" fontWeight="bold">My Achievements</Typography>
+          </Box>
+          {achievementsLoading ? (
+            <Box sx={{ textAlign: 'center', py: 2 }}>
+              <CircularProgress color="inherit" />
+            </Box>
+          ) : achievements.length === 0 ? (
+            <Typography variant="body2" color="white">No achievements yet. Start engaging to earn badges!</Typography>
+          ) : (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              {achievements.map((ua) => (
+                <Card key={ua.id} sx={{ minWidth: 180, maxWidth: 220, background: 'rgba(255,255,255,0.15)', color: 'white', borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                  <CardContent>
+                    <Box display="flex" alignItems="center" gap={1} mb={1}>
+                      <Avatar sx={{ bgcolor: '#fffde4', color: '#ffa751', width: 36, height: 36, fontSize: 22 }}>
+                        {/* Use icon name or fallback */}
+                        <EmojiEventsIcon />
+                      </Avatar>
+                      <Typography variant="subtitle1" fontWeight="bold" sx={{ color: '#fff' }}>{ua.achievement.name}</Typography>
+                    </Box>
+                    <Typography variant="body2" sx={{ color: '#fffde4' }}>{ua.achievement.description}</Typography>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          )}
+        </CardContent>
+      </Card>
     </Box>
   );
 }
@@ -1790,7 +1931,2119 @@ function Events() {
   return <div>Events Page</div>;
 }
 
+function Games() {
+  const { selectedGroup } = useGroup();
+  const [activeTab, setActiveTab] = useState(0);
+  const [challenges, setChallenges] = useState<any[]>([]);
+  const [streaks, setStreaks] = useState<any[]>([]);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [userStats, setUserStats] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [newChallenge, setNewChallenge] = useState({
+    title: '',
+    description: '',
+    challenge_type: 'daily',
+    category: 'post',
+    target_count: 1,
+    points_reward: 10,
+    start_date: '',
+    end_date: ''
+  });
+  const [showCreateChallenge, setShowCreateChallenge] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [challengeToDelete, setChallengeToDelete] = useState<any>(null);
+  const [polls, setPolls] = useState<any[]>([]);
+  const [showCreatePoll, setShowCreatePoll] = useState(false);
+  const [newPoll, setNewPoll] = useState({
+    question: '',
+    options: [{ text: '' }, { text: '' }],
+    allow_multiple: false
+  });
+  const [pollVoteLoading, setPollVoteLoading] = useState(false);
+  const [pollVoteError, setPollVoteError] = useState('');
+  const [pollCreateError, setPollCreateError] = useState('');
+  
+  // Social Icebreakers state
+  const [twoTruthsLieGames, setTwoTruthsLieGames] = useState<any[]>([]);
+  const [showCreateTwoTruthsLie, setShowCreateTwoTruthsLie] = useState(false);
+  const [newTwoTruthsLie, setNewTwoTruthsLie] = useState({
+    statement1: '',
+    statement2: '',
+    statement3: '',
+    lie_statement: 1
+  });
+  
+  const [wouldYouRatherPolls, setWouldYouRatherPolls] = useState<any[]>([]);
+  const [showCreateWouldYouRather, setShowCreateWouldYouRather] = useState(false);
+  const [newWouldYouRather, setNewWouldYouRather] = useState({
+    question: '',
+    option_a: '',
+    option_b: ''
+  });
+  
+  const [thisOrThatPolls, setThisOrThatPolls] = useState<any[]>([]);
+  const [showCreateThisOrThat, setShowCreateThisOrThat] = useState(false);
+  const [newThisOrThat, setNewThisOrThat] = useState({
+    question: '',
+    option_a: '',
+    option_b: ''
+  });
+  
+  const [fillInBlankGames, setFillInBlankGames] = useState<any[]>([]);
+  const [showCreateFillInBlank, setShowCreateFillInBlank] = useState(false);
+  const [newFillInBlank, setNewFillInBlank] = useState({
+    template: ''
+  });
 
+  const fetchGamesData = () => {
+    if (!selectedGroup) return;
+    setLoading(true);
+    // Fetch challenges
+    apiClient.get(`/games/challenges/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setChallenges(res.data))
+      .catch(() => setChallenges([]));
+    // Fetch streaks
+    apiClient.get(`/games/streaks/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setStreaks(res.data))
+      .catch(() => setStreaks([]));
+    // Fetch leaderboard
+    apiClient.get(`/games/leaderboard-entries/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setLeaderboard(res.data))
+      .catch(() => setLeaderboard([]));
+    // Fetch user stats
+    apiClient.get(`/games/user-stats/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setUserStats(res.data))
+      .catch(() => setUserStats(null))
+      .finally(() => setLoading(false));
+  };
+
+  const fetchPolls = useCallback(() => {
+    if (!selectedGroup) return;
+    apiClient.get(`/games/polls/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setPolls(res.data))
+      .catch(() => setPolls([]));
+  }, [selectedGroup]);
+
+  const fetchSocialIcebreakers = useCallback(() => {
+    if (!selectedGroup) return;
+    
+    // Fetch Two Truths and Lie games
+    apiClient.get(`/games/two-truths-lie/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setTwoTruthsLieGames(res.data))
+      .catch(() => setTwoTruthsLieGames([]));
+    
+    // Fetch Would You Rather polls
+    apiClient.get(`/games/would-you-rather/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setWouldYouRatherPolls(res.data))
+      .catch(() => setWouldYouRatherPolls([]));
+    
+    // Fetch This or That polls
+    apiClient.get(`/games/this-or-that/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setThisOrThatPolls(res.data))
+      .catch(() => setThisOrThatPolls([]));
+    
+    // Fetch Fill in the Blank games
+    apiClient.get(`/games/fill-in-blank/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setFillInBlankGames(res.data))
+      .catch(() => setFillInBlankGames([]));
+  }, [selectedGroup]);
+
+  useEffect(() => {
+    fetchGamesData();
+    fetchPolls();
+    fetchSocialIcebreakers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGroup]);
+
+  const handleCreateChallenge = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await apiClient.post('/games/challenges/', {
+        ...newChallenge,
+        group: selectedGroup.group_id
+      });
+      setNewChallenge({
+        title: '',
+        description: '',
+        challenge_type: 'daily',
+        category: 'post',
+        target_count: 1,
+        points_reward: 10,
+        start_date: '',
+        end_date: ''
+      });
+      setShowCreateChallenge(false);
+      fetchGamesData();
+    } catch (err: any) {
+      console.error('Failed to create challenge:', err);
+    }
+  };
+
+  const calculateLeaderboard = async () => {
+    try {
+      await apiClient.post('/games/leaderboards/calculate/', {
+        group: selectedGroup.group_id,
+        period: 'all_time'
+      });
+      fetchGamesData();
+    } catch (err: any) {
+      console.error('Failed to calculate leaderboard:', err);
+    }
+  };
+
+  // Delete challenge logic
+  const handleDeleteChallenge = (challenge: any) => {
+    setChallengeToDelete(challenge);
+    setDeleteDialogOpen(true);
+  };
+  const confirmDeleteChallenge = async () => {
+    if (!challengeToDelete) return;
+    try {
+      await apiClient.delete(`/games/challenges/${challengeToDelete.id}/`);
+      setDeleteDialogOpen(false);
+      setChallengeToDelete(null);
+      fetchGamesData();
+    } catch (err: any) {
+      setDeleteDialogOpen(false);
+      setChallengeToDelete(null);
+      console.error('Failed to delete challenge:', err);
+    }
+  };
+  const cancelDeleteChallenge = () => {
+    setDeleteDialogOpen(false);
+    setChallengeToDelete(null);
+  };
+
+  // Filter out expired challenges (optional, for UX)
+  const now = new Date();
+  const filteredChallenges = challenges.filter((c: any) => {
+    if (!c.end_date) return true;
+    return new Date(c.end_date) >= now;
+  });
+
+  // Poll creation logic
+  const handleAddPollOption = () => {
+    setNewPoll({ ...newPoll, options: [...newPoll.options, { text: '' }] });
+  };
+  const handleRemovePollOption = (idx: number) => {
+    if (newPoll.options.length <= 2) return;
+    setNewPoll({ ...newPoll, options: newPoll.options.filter((_, i) => i !== idx) });
+  };
+  const handlePollOptionChange = (idx: number, value: string) => {
+    const options = [...newPoll.options];
+    options[idx].text = value;
+    setNewPoll({ ...newPoll, options });
+  };
+  const handleCreatePoll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPollCreateError('');
+    try {
+      await apiClient.post('/games/polls/', {
+        group: selectedGroup.group_id,
+        question: newPoll.question,
+        allow_multiple: newPoll.allow_multiple,
+        options: newPoll.options.filter(opt => opt.text.trim() !== '')
+      });
+      setShowCreatePoll(false);
+      setNewPoll({ question: '', options: [{ text: '' }, { text: '' }], allow_multiple: false });
+      fetchPolls();
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        setPollCreateError(
+          typeof err.response.data === 'string'
+            ? err.response.data
+            : JSON.stringify(err.response.data)
+        );
+      } else {
+        setPollCreateError('Failed to create poll.');
+      }
+    }
+  };
+
+  // Poll voting logic
+  const handleVote = async (poll: any, selectedOptionIds: number[]) => {
+    setPollVoteLoading(true);
+    setPollVoteError('');
+    try {
+      await apiClient.post(`/games/polls/${poll.id}/vote/`, { option_ids: selectedOptionIds });
+      fetchPolls();
+    } catch (err: any) {
+      setPollVoteError('Failed to vote.');
+    } finally {
+      setPollVoteLoading(false);
+    }
+  };
+
+  // Social Icebreakers handlers
+  const handleCreateTwoTruthsLie = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form data
+    if (!newTwoTruthsLie.statement1.trim() || !newTwoTruthsLie.statement2.trim() || !newTwoTruthsLie.statement3.trim()) {
+      alert('Please fill in all three statements');
+      return;
+    }
+    
+    const requestData = {
+      statement1: newTwoTruthsLie.statement1.trim(),
+      statement2: newTwoTruthsLie.statement2.trim(),
+      statement3: newTwoTruthsLie.statement3.trim(),
+      lie_statement: parseInt(newTwoTruthsLie.lie_statement.toString()),
+      group: selectedGroup.group_id
+    };
+    try {
+      await apiClient.post('/games/two-truths-lie/', requestData);
+      setNewTwoTruthsLie({
+        statement1: '',
+        statement2: '',
+        statement3: '',
+        lie_statement: 1
+      });
+      setShowCreateTwoTruthsLie(false);
+      fetchSocialIcebreakers();
+    } catch (err: any) {
+      console.error('Failed to create Two Truths and Lie game:', err);
+      if (err.response?.data) {
+        console.error('Error details:', err.response.data);
+        alert('Failed to create game: ' + JSON.stringify(err.response.data));
+      } else {
+        alert('Failed to create game. Please try again.');
+      }
+    }
+  };
+
+  const handleCreateWouldYouRather = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form data
+    if (!newWouldYouRather.question.trim() || !newWouldYouRather.option_a.trim() || !newWouldYouRather.option_b.trim()) {
+      alert('Please fill in all fields');
+      return;
+    }
+    
+    const requestData = {
+      question: newWouldYouRather.question.trim(),
+      option_a: newWouldYouRather.option_a.trim(),
+      option_b: newWouldYouRather.option_b.trim(),
+      group: selectedGroup.group_id
+    };
+    
+    try {
+      await apiClient.post('/games/would-you-rather/', requestData);
+      setNewWouldYouRather({
+        question: '',
+        option_a: '',
+        option_b: ''
+      });
+      setShowCreateWouldYouRather(false);
+      fetchSocialIcebreakers();
+    } catch (err: any) {
+      console.error('Failed to create Would You Rather poll:', err);
+      if (err.response?.data) {
+        console.error('Error details:', err.response.data);
+        alert('Failed to create poll: ' + JSON.stringify(err.response.data));
+      } else {
+        alert('Failed to create poll. Please try again.');
+      }
+    }
+  };
+
+  const handleCreateThisOrThat = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form data
+    if (!newThisOrThat.question.trim() || !newThisOrThat.option_a.trim() || !newThisOrThat.option_b.trim()) {
+      alert('Please fill in all fields');
+      return;
+    }
+    
+    const requestData = {
+      question: newThisOrThat.question.trim(),
+      option_a: newThisOrThat.option_a.trim(),
+      option_b: newThisOrThat.option_b.trim(),
+      group: selectedGroup.group_id
+    };
+    
+    try {
+      await apiClient.post('/games/this-or-that/', requestData);
+      setNewThisOrThat({
+        question: '',
+        option_a: '',
+        option_b: ''
+      });
+      setShowCreateThisOrThat(false);
+      fetchSocialIcebreakers();
+    } catch (err: any) {
+      console.error('Failed to create This or That poll:', err);
+      if (err.response?.data) {
+        console.error('Error details:', err.response.data);
+        alert('Failed to create poll: ' + JSON.stringify(err.response.data));
+      } else {
+        alert('Failed to create poll. Please try again.');
+      }
+    }
+  };
+
+  const handleCreateFillInBlank = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form data
+    if (!newFillInBlank.template.trim()) {
+      alert('Please enter a template');
+      return;
+    }
+    
+    if (!newFillInBlank.template.includes('{blank}')) {
+      alert('Please include {blank} in your template to indicate where the blank should be');
+      return;
+    }
+    
+    const requestData = {
+      template: newFillInBlank.template.trim(),
+      group: selectedGroup.group_id
+    };
+    
+    try {
+      await apiClient.post('/games/fill-in-blank/', requestData);
+      setNewFillInBlank({
+        template: ''
+      });
+      setShowCreateFillInBlank(false);
+      fetchSocialIcebreakers();
+    } catch (err: any) {
+      console.error('Failed to create Fill in the Blank game:', err);
+      if (err.response?.data) {
+        console.error('Error details:', err.response.data);
+        alert('Failed to create game: ' + JSON.stringify(err.response.data));
+      } else {
+        alert('Failed to create game. Please try again.');
+      }
+    }
+  };
+
+  if (!selectedGroup) {
+    return (
+      <Card sx={{ 
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        borderRadius: 3,
+        p: 4,
+        textAlign: 'center'
+      }}>
+        <Typography variant="h6" fontWeight="bold">
+          🎯 Please select a group to view games
+        </Typography>
+      </Card>
+    );
+  }
+
+  return (
+    <Box>
+      {/* Header */}
+      <Card sx={{ 
+        mb: 4, 
+        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        color: 'white',
+        borderRadius: 3,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+      }}>
+        <CardContent sx={{ p: 4 }}>
+          <Box display="flex" alignItems="center" mb={2}>
+            <EmojiEventsIcon sx={{ mr: 2, fontSize: 32 }} />
+            <Typography variant="h4" fontWeight="bold">
+              Games & Challenges
+            </Typography>
+          </Box>
+          <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
+            Level up your group engagement! 🚀
+          </Typography>
+        </CardContent>
+      </Card>
+
+      {/* User Stats Card */}
+      {userStats && (
+        <Card sx={{ 
+          mb: 3, 
+          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+          color: 'white',
+          borderRadius: 3,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+        }}>
+          <CardContent>
+            <Box display="flex" alignItems="center" mb={2}>
+              <StarIcon sx={{ mr: 1, fontSize: 28 }} />
+              <Typography variant="h6" fontWeight="bold">Your Stats</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              <Box sx={{ textAlign: 'center', minWidth: 80 }}>
+                <Typography variant="h4" fontWeight="bold">{userStats.total_points}</Typography>
+                <Typography variant="body2">Points</Typography>
+              </Box>
+              <Box sx={{ textAlign: 'center', minWidth: 80 }}>
+                <Typography variant="h4" fontWeight="bold">{userStats.total_posts}</Typography>
+                <Typography variant="body2">Posts</Typography>
+              </Box>
+              <Box sx={{ textAlign: 'center', minWidth: 80 }}>
+                <Typography variant="h4" fontWeight="bold">{userStats.challenges_completed}</Typography>
+                <Typography variant="body2">Challenges</Typography>
+              </Box>
+              <Box sx={{ textAlign: 'center', minWidth: 80 }}>
+                <Typography variant="h4" fontWeight="bold">{userStats.rank || 'N/A'}</Typography>
+                <Typography variant="body2">Rank</Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tabs */}
+      <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs 
+            value={activeTab} 
+            onChange={(e, newValue) => setActiveTab(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              '& .MuiTab-root': {
+                fontWeight: 'bold',
+                fontSize: '0.9rem',
+                textTransform: 'none',
+                minHeight: 64,
+                minWidth: 120
+              }
+            }}
+          >
+            <Tab 
+              icon={<EmojiEventsIcon />} 
+              label="Challenges" 
+              iconPosition="start"
+            />
+            <Tab 
+              icon={<TrendingUpIcon />} 
+              label="Streaks" 
+              iconPosition="start"
+            />
+            <Tab 
+              icon={<LeaderboardIcon />} 
+              label="Leaderboard" 
+              iconPosition="start"
+            />
+            <Tab icon={<PollIcon />} label="Polls" iconPosition="start" />
+            <Tab icon={<MemoryIcon />} label="Photo Memory" iconPosition="start" />
+            <Tab icon={<LinkIcon />} label="Word Association" iconPosition="start" />
+            <Tab icon={<PsychologyIcon />} label="Two Truths & Lie" iconPosition="start" />
+            <Tab icon={<QuestionAnswerIcon />} label="Would You Rather" iconPosition="start" />
+            <Tab icon={<CompareArrowsIcon />} label="This or That" iconPosition="start" />
+            <Tab icon={<CreateIcon />} label="Fill in Blank" iconPosition="start" />
+          </Tabs>
+          <Box sx={{ textAlign: 'center', py: 1, color: 'text.secondary', fontSize: '0.8rem' }}>
+            ← Scroll to see all game types →
+          </Box>
+        </Box>
+
+        <Box sx={{ p: 3 }}>
+          {/* Challenges Tab */}
+          {activeTab === 0 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight="bold">Active Challenges</Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCreateChallenge(true)}
+                  sx={{
+                    background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: 2
+                  }}
+                >
+                  Create Challenge
+                </Button>
+              </Box>
+              
+              {loading ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : filteredChallenges.length === 0 ? (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <EmojiEventsIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No challenges yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Create the first challenge to get your group engaged!
+                  </Typography>
+                </Card>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {filteredChallenges.map((challenge) => (
+                    <Card key={challenge.id} sx={{ 
+                      borderRadius: 2,
+                      border: challenge.is_current ? '2px solid #4caf50' : '1px solid #e0e0e0',
+                      background: challenge.is_current ? 'rgba(76, 175, 80, 0.05)' : 'white'
+                    }}>
+                      <CardContent>
+                        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                          <Box>
+                            <Typography variant="h6" fontWeight="bold" gutterBottom>
+                              {challenge.title}
+                              {challenge.is_current && (
+                                <Chip 
+                                  label="Active" 
+                                  size="small" 
+                                  color="success" 
+                                  sx={{ ml: 1 }}
+                                />
+                              )}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" gutterBottom>
+                              {challenge.description}
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+                              <Chip 
+                                label={challenge.challenge_type} 
+                                size="small" 
+                                variant="outlined"
+                              />
+                              <Chip 
+                                label={challenge.category} 
+                                size="small" 
+                                variant="outlined"
+                              />
+                              <Chip 
+                                label={`${challenge.points_reward} pts`} 
+                                size="small" 
+                                color="primary"
+                              />
+                            </Box>
+                          </Box>
+                          <Box sx={{ textAlign: 'right' }}>
+                            <Typography variant="body2" color="text.secondary">
+                              {challenge.days_remaining > 0 ? `${challenge.days_remaining} days left` : 'Expired'}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {challenge.progress_count} completed
+                            </Typography>
+                            <Button
+                              size="small"
+                              color="error"
+                              startIcon={<DeleteIcon />}
+                              onClick={() => handleDeleteChallenge(challenge)}
+                              sx={{ mt: 1 }}
+                            >
+                              Delete
+                            </Button>
+                          </Box>
+                        </Box>
+                        {/* Progress Bar */}
+                        <Box sx={{ mt: 2 }}>
+                          <Box display="flex" justifyContent="space-between" mb={1}>
+                            <Typography variant="body2" color="text.secondary">
+                              Progress
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {challenge.completion_rate}%
+                            </Typography>
+                          </Box>
+                          <LinearProgress 
+                            variant="determinate" 
+                            value={challenge.completion_rate} 
+                            sx={{ height: 8, borderRadius: 4 }}
+                          />
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* Streaks Tab */}
+          {activeTab === 1 && (
+            <Box>
+              <Typography variant="h6" fontWeight="bold" mb={3}>Your Streaks</Typography>
+              
+              {loading ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : streaks.length === 0 ? (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <TrendingUpIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No streaks yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Start posting, commenting, and reacting to build your streaks!
+                  </Typography>
+                </Card>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {streaks.map((streak) => (
+                    <Card key={streak.id} sx={{ borderRadius: 2 }}>
+                      <CardContent>
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                          <Box>
+                            <Typography variant="h6" fontWeight="bold" gutterBottom>
+                              {streak.streak_type.charAt(0).toUpperCase() + streak.streak_type.slice(1)} Streak
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Current: {streak.current_streak} days
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Longest: {streak.longest_streak} days
+                            </Typography>
+                          </Box>
+                          <Box sx={{ textAlign: 'center' }}>
+                            <Typography variant="h3" fontWeight="bold" color="primary">
+                              {streak.current_streak}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              days
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* Leaderboard Tab */}
+          {activeTab === 2 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight="bold">Group Leaderboard</Typography>
+                <Button
+                  variant="outlined"
+                  onClick={calculateLeaderboard}
+                  sx={{ borderRadius: 2 }}
+                >
+                  Refresh
+                </Button>
+              </Box>
+              
+              {loading ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : leaderboard.length === 0 ? (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <LeaderboardIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No leaderboard data
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Start engaging with your group to see rankings!
+                  </Typography>
+                </Card>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {leaderboard.map((entry, index) => (
+                    <Card key={entry.id} sx={{ 
+                      borderRadius: 2,
+                      border: index === 0 ? '2px solid #ffd700' : 
+                              index === 1 ? '2px solid #c0c0c0' : 
+                              index === 2 ? '2px solid #cd7f32' : '1px solid #e0e0e0'
+                    }}>
+                      <CardContent>
+                        <Box display="flex" alignItems="center" gap={2}>
+                          <Box sx={{ 
+                            width: 40, 
+                            height: 40, 
+                            borderRadius: '50%', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            background: index === 0 ? '#ffd700' : 
+                                       index === 1 ? '#c0c0c0' : 
+                                       index === 2 ? '#cd7f32' : '#e0e0e0',
+                            color: index < 3 ? 'white' : 'text.primary',
+                            fontWeight: 'bold'
+                          }}>
+                            {index + 1}
+                          </Box>
+                          <Box sx={{ flexGrow: 1 }}>
+                            <Typography variant="h6" fontWeight="bold">
+                              {entry.username}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {entry.points} points
+                            </Typography>
+                          </Box>
+                          <Box sx={{ textAlign: 'right' }}>
+                            <Typography variant="body2" color="text.secondary">
+                              {entry.posts_count} posts
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {entry.events_count} events
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* Polls Tab */}
+          {activeTab === 3 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight="bold">Group Polls</Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCreatePoll(true)}
+                  sx={{
+                    background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: 2
+                  }}
+                >
+                  Create Poll
+                </Button>
+              </Box>
+              {polls.length === 0 ? (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <PollIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No polls yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Create the first poll to get your group engaged!
+                  </Typography>
+                </Card>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {polls.map((poll) => (
+                    <Card key={poll.id} sx={{ borderRadius: 2 }}>
+                      <CardContent>
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                          <Typography variant="h6" fontWeight="bold" gutterBottom>
+                            {poll.question}
+                          </Typography>
+                        </Box>
+                        {/* Voting UI */}
+                        {!poll.has_voted && poll.is_active ? (
+                          <Box>
+                            <PollVotingUI poll={poll} onVote={handleVote} loading={pollVoteLoading} error={pollVoteError} />
+                          </Box>
+                        ) : (
+                          <Box>
+                            <PollResultsUI poll={poll} />
+                          </Box>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              )}
+              {/* Create Poll Dialog */}
+              <Dialog open={showCreatePoll} onClose={() => setShowCreatePoll(false)} maxWidth="sm" fullWidth>
+                <DialogTitle>
+                  <Typography variant="h6" fontWeight="bold">Create New Poll</Typography>
+                </DialogTitle>
+                <form onSubmit={handleCreatePoll}>
+                  <DialogContent>
+                    <TextField
+                      fullWidth
+                      label="Poll Question"
+                      value={newPoll.question}
+                      onChange={e => setNewPoll({ ...newPoll, question: e.target.value })}
+                      margin="normal"
+                      required
+                    />
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}>
+                      {newPoll.options.map((opt, idx) => (
+                        <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <TextField
+                            fullWidth
+                            label={`Option ${idx + 1}`}
+                            value={opt.text}
+                            onChange={e => handlePollOptionChange(idx, e.target.value)}
+                            required
+                          />
+                          {newPoll.options.length > 2 && (
+                            <Button onClick={() => handleRemovePollOption(idx)} color="error" size="small">Remove</Button>
+                          )}
+                        </Box>
+                      ))}
+                      <Button onClick={handleAddPollOption} startIcon={<AddIcon />} size="small">Add Option</Button>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                      <TextField
+                        select
+                        fullWidth
+                        label="Allow Multiple Selection"
+                        value={newPoll.allow_multiple ? 'yes' : 'no'}
+                        onChange={e => setNewPoll({ ...newPoll, allow_multiple: e.target.value === 'yes' })}
+                        margin="normal"
+                        required
+                      >
+                        <MenuItem value="no">No</MenuItem>
+                        <MenuItem value="yes">Yes</MenuItem>
+                      </TextField>
+                    </Box>
+                    {pollCreateError && (
+                      <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                        {pollCreateError}
+                      </Typography>
+                    )}
+                  </DialogContent>
+                  <DialogActions sx={{ p: 2 }}>
+                    <Button onClick={() => setShowCreatePoll(false)}>Cancel</Button>
+                    <Button type="submit" variant="contained" sx={{ background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)', borderRadius: 2 }}>Create Poll</Button>
+                  </DialogActions>
+                </form>
+              </Dialog>
+            </Box>
+          )}
+
+          {activeTab === 4 && (
+            <PhotoMemoryGame groupId={selectedGroup.group_id} />
+          )}
+
+          {activeTab === 5 && (
+            <WordAssociationGame groupId={selectedGroup.group_id} />
+          )}
+
+          {/* Two Truths and Lie Tab */}
+          {activeTab === 6 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight="bold">Two Truths and a Lie</Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCreateTwoTruthsLie(true)}
+                  sx={{
+                    background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: 2
+                  }}
+                >
+                  Create Game
+                </Button>
+              </Box>
+              
+              {twoTruthsLieGames.length === 0 ? (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <PsychologyIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No games yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Create the first Two Truths and a Lie game!
+                  </Typography>
+                </Card>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {twoTruthsLieGames.map((game) => (
+                    <TwoTruthsLieGame key={game.id} game={game} onRefresh={fetchSocialIcebreakers} />
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* Would You Rather Tab */}
+          {activeTab === 7 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight="bold">Would You Rather</Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCreateWouldYouRather(true)}
+                  sx={{
+                    background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: 2
+                  }}
+                >
+                  Create Poll
+                </Button>
+              </Box>
+              
+              {wouldYouRatherPolls.length === 0 ? (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <QuestionAnswerIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No polls yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Create the first Would You Rather poll!
+                  </Typography>
+                </Card>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {wouldYouRatherPolls.map((poll) => (
+                    <WouldYouRatherPoll key={poll.id} poll={poll} onRefresh={fetchSocialIcebreakers} />
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* This or That Tab */}
+          {activeTab === 8 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight="bold">This or That</Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCreateThisOrThat(true)}
+                  sx={{
+                    background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: 2
+                  }}
+                >
+                  Create Poll
+                </Button>
+              </Box>
+              
+              {thisOrThatPolls.length === 0 ? (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <CompareArrowsIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No polls yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Create the first This or That poll!
+                  </Typography>
+                </Card>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {thisOrThatPolls.map((poll) => (
+                    <ThisOrThatPoll key={poll.id} poll={poll} onRefresh={fetchSocialIcebreakers} />
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* Fill in the Blank Tab */}
+          {activeTab === 9 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight="bold">Fill in the Blank</Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCreateFillInBlank(true)}
+                  sx={{
+                    background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: 2
+                  }}
+                >
+                  Create Game
+                </Button>
+              </Box>
+              
+              {fillInBlankGames.length === 0 ? (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <CreateIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No games yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Create the first Fill in the Blank game!
+                  </Typography>
+                </Card>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {fillInBlankGames.map((game) => (
+                    <FillInBlankGame key={game.id} game={game} onRefresh={fetchSocialIcebreakers} />
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+        </Box>
+      </Card>
+
+      {/* Create Challenge Dialog */}
+      <Dialog 
+        open={showCreateChallenge} 
+        onClose={() => setShowCreateChallenge(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" fontWeight="bold">Create New Challenge</Typography>
+        </DialogTitle>
+        <form onSubmit={handleCreateChallenge}>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Challenge Title"
+              value={newChallenge.title}
+              onChange={(e) => setNewChallenge({...newChallenge, title: e.target.value})}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={newChallenge.description}
+              onChange={(e) => setNewChallenge({...newChallenge, description: e.target.value})}
+              margin="normal"
+              multiline
+              rows={3}
+              required
+            />
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+              <TextField
+                select
+                fullWidth
+                label="Challenge Type"
+                value={newChallenge.challenge_type}
+                onChange={(e) => setNewChallenge({...newChallenge, challenge_type: e.target.value})}
+                margin="normal"
+                required
+              >
+                <MenuItem value="daily">Daily</MenuItem>
+                <MenuItem value="weekly">Weekly</MenuItem>
+                <MenuItem value="monthly">Monthly</MenuItem>
+                <MenuItem value="special">Special Event</MenuItem>
+              </TextField>
+              <TextField
+                select
+                fullWidth
+                label="Category"
+                value={newChallenge.category}
+                onChange={(e) => setNewChallenge({...newChallenge, category: e.target.value})}
+                margin="normal"
+                required
+              >
+                <MenuItem value="post">Posting</MenuItem>
+                <MenuItem value="event">Event Planning</MenuItem>
+                <MenuItem value="interaction">Social Interaction</MenuItem>
+                <MenuItem value="media">Media Sharing</MenuItem>
+                <MenuItem value="engagement">Engagement</MenuItem>
+              </TextField>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Target Count"
+                value={newChallenge.target_count}
+                onChange={(e) => setNewChallenge({...newChallenge, target_count: parseInt(e.target.value)})}
+                margin="normal"
+                required
+              />
+              <TextField
+                fullWidth
+                type="number"
+                label="Points Reward"
+                value={newChallenge.points_reward}
+                onChange={(e) => setNewChallenge({...newChallenge, points_reward: parseInt(e.target.value)})}
+                margin="normal"
+                required
+              />
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+              <TextField
+                fullWidth
+                type="datetime-local"
+                label="Start Date"
+                value={newChallenge.start_date}
+                onChange={(e) => setNewChallenge({...newChallenge, start_date: e.target.value})}
+                margin="normal"
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                fullWidth
+                type="datetime-local"
+                label="End Date"
+                value={newChallenge.end_date}
+                onChange={(e) => setNewChallenge({...newChallenge, end_date: e.target.value})}
+                margin="normal"
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setShowCreateChallenge(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" sx={{
+              background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: 2
+            }}>
+              Create Challenge
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Delete Challenge Dialog */}
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={cancelDeleteChallenge}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" fontWeight="bold">Delete Challenge</Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this challenge?</Typography>
+          {challengeToDelete && (
+            <Box sx={{ mt: 2, p: 2, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                {challengeToDelete.title}
+              </Typography>
+            </Box>
+          )}
+          <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={cancelDeleteChallenge} variant="outlined">Cancel</Button>
+          <Button onClick={confirmDeleteChallenge} variant="contained" color="error">Delete</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Create Two Truths and Lie Dialog */}
+      <Dialog 
+        open={showCreateTwoTruthsLie} 
+        onClose={() => setShowCreateTwoTruthsLie(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" fontWeight="bold">Create Two Truths and a Lie</Typography>
+        </DialogTitle>
+        <form onSubmit={handleCreateTwoTruthsLie}>
+          <DialogContent>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Write three statements about yourself - two true and one false. Others will try to guess which one is the lie!
+            </Typography>
+            <TextField
+              fullWidth
+              label="Statement 1"
+              value={newTwoTruthsLie.statement1}
+              onChange={(e) => setNewTwoTruthsLie({...newTwoTruthsLie, statement1: e.target.value})}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Statement 2"
+              value={newTwoTruthsLie.statement2}
+              onChange={(e) => setNewTwoTruthsLie({...newTwoTruthsLie, statement2: e.target.value})}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Statement 3"
+              value={newTwoTruthsLie.statement3}
+              onChange={(e) => setNewTwoTruthsLie({...newTwoTruthsLie, statement3: e.target.value})}
+              margin="normal"
+              required
+            />
+            <TextField
+              select
+              fullWidth
+              label="Which statement is the lie?"
+              value={newTwoTruthsLie.lie_statement}
+              onChange={(e) => setNewTwoTruthsLie({...newTwoTruthsLie, lie_statement: parseInt(e.target.value)})}
+              margin="normal"
+              required
+            >
+              <MenuItem value={1}>Statement 1</MenuItem>
+              <MenuItem value={2}>Statement 2</MenuItem>
+              <MenuItem value={3}>Statement 3</MenuItem>
+            </TextField>
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setShowCreateTwoTruthsLie(false)}>Cancel</Button>
+            <Button type="submit" variant="contained" sx={{
+              background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: 2
+            }}>
+              Create Game
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Create Would You Rather Dialog */}
+      <Dialog 
+        open={showCreateWouldYouRather} 
+        onClose={() => setShowCreateWouldYouRather(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" fontWeight="bold">Create Would You Rather Poll</Typography>
+        </DialogTitle>
+        <form onSubmit={handleCreateWouldYouRather}>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Question"
+              value={newWouldYouRather.question}
+              onChange={(e) => setNewWouldYouRather({...newWouldYouRather, question: e.target.value})}
+              margin="normal"
+              required
+              placeholder="e.g., Would you rather..."
+            />
+            <TextField
+              fullWidth
+              label="Option A"
+              value={newWouldYouRather.option_a}
+              onChange={(e) => setNewWouldYouRather({...newWouldYouRather, option_a: e.target.value})}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Option B"
+              value={newWouldYouRather.option_b}
+              onChange={(e) => setNewWouldYouRather({...newWouldYouRather, option_b: e.target.value})}
+              margin="normal"
+              required
+            />
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setShowCreateWouldYouRather(false)}>Cancel</Button>
+            <Button type="submit" variant="contained" sx={{
+              background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: 2
+            }}>
+              Create Poll
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Create This or That Dialog */}
+      <Dialog 
+        open={showCreateThisOrThat} 
+        onClose={() => setShowCreateThisOrThat(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" fontWeight="bold">Create This or That Poll</Typography>
+        </DialogTitle>
+        <form onSubmit={handleCreateThisOrThat}>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Question"
+              value={newThisOrThat.question}
+              onChange={(e) => setNewThisOrThat({...newThisOrThat, question: e.target.value})}
+              margin="normal"
+              required
+              placeholder="e.g., This or that..."
+            />
+            <TextField
+              fullWidth
+              label="Option A"
+              value={newThisOrThat.option_a}
+              onChange={(e) => setNewThisOrThat({...newThisOrThat, option_a: e.target.value})}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Option B"
+              value={newThisOrThat.option_b}
+              onChange={(e) => setNewThisOrThat({...newThisOrThat, option_b: e.target.value})}
+              margin="normal"
+              required
+            />
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setShowCreateThisOrThat(false)}>Cancel</Button>
+            <Button type="submit" variant="contained" sx={{
+              background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: 2
+            }}>
+              Create Poll
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Create Fill in the Blank Dialog */}
+      <Dialog 
+        open={showCreateFillInBlank} 
+        onClose={() => setShowCreateFillInBlank(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" fontWeight="bold">Create Fill in the Blank</Typography>
+        </DialogTitle>
+        <form onSubmit={handleCreateFillInBlank}>
+          <DialogContent>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Create a sentence with a blank that others will fill in. Use {"{blank}"} to indicate where the blank should be.
+            </Typography>
+            <TextField
+              fullWidth
+              label="Template"
+              value={newFillInBlank.template}
+              onChange={(e) => setNewFillInBlank({...newFillInBlank, template: e.target.value})}
+              margin="normal"
+              required
+              placeholder="e.g., My favorite food is {blank}"
+              multiline
+              rows={3}
+            />
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setShowCreateFillInBlank(false)}>Cancel</Button>
+            <Button type="submit" variant="contained" sx={{
+              background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: 2
+            }}>
+              Create Game
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+    </Box>
+  );
+}
+
+// Poll voting UI component
+function PollVotingUI({ poll, onVote, loading, error }: { poll: any, onVote: (poll: any, selectedOptionIds: number[]) => void, loading: boolean, error: string }) {
+  const [selected, setSelected] = React.useState<number[]>([]);
+  const handleSelect = (optionId: number) => {
+    if (poll.allow_multiple) {
+      setSelected(prev => prev.includes(optionId) ? prev.filter(id => id !== optionId) : [...prev, optionId]);
+    } else {
+      setSelected([optionId]);
+    }
+  };
+  return (
+    <Box>
+      {poll.options.map((opt: any) => (
+        <Box key={opt.id} display="flex" alignItems="center" mb={1}>
+          <Checkbox
+            checked={selected.includes(opt.id)}
+            onChange={() => handleSelect(opt.id)}
+            disabled={loading || !poll.is_active}
+            inputProps={{ 'aria-label': opt.text }}
+            sx={{ mr: 1 }}
+            {...(!poll.allow_multiple ? { icon: <RadioButtonUncheckedIcon />, checkedIcon: <RadioButtonCheckedIcon /> } : {})}
+          />
+          <Typography>{opt.text}</Typography>
+        </Box>
+      ))}
+      {error && <Typography color="error" variant="body2">{error}</Typography>}
+      <Button
+        variant="contained"
+        disabled={loading || selected.length === 0}
+        onClick={() => onVote(poll, selected)}
+        sx={{ mt: 1, borderRadius: 2 }}
+      >
+        {loading ? 'Submitting...' : 'Vote'}
+      </Button>
+    </Box>
+  );
+}
+
+// Poll results UI component
+function PollResultsUI({ poll }: { poll: any }) {
+  const totalVotes = poll.options.reduce((sum: number, opt: any) => sum + (opt.votes_count || 0), 0);
+  return (
+    <Box>
+      {poll.options.map((opt: any) => {
+        const percent = totalVotes ? (opt.votes_count / totalVotes) * 100 : 0;
+        return (
+          <Box key={opt.id} mb={2}>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Typography>{opt.text}</Typography>
+              <Typography variant="body2" color="text.secondary">{opt.votes_count} vote{opt.votes_count !== 1 ? 's' : ''} ({percent.toFixed(0)}%)</Typography>
+            </Box>
+            <LinearProgress variant="determinate" value={percent} sx={{ height: 10, borderRadius: 5, mt: 0.5 }} />
+          </Box>
+        );
+      })}
+      <Typography variant="body2" color="text.secondary" mt={1}>
+        Total votes: {totalVotes}
+      </Typography>
+    </Box>
+  );
+}
+
+function PhotoMemoryGame({ groupId }: { groupId: number }) {
+  const [cards, setCards] = useState<any[]>([]);
+  const [flipped, setFlipped] = useState<number[]>([]);
+  const [matched, setMatched] = useState<number[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [timer, setTimer] = useState(60);
+  const [gameOver, setGameOver] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
+  const [showTimeout, setShowTimeout] = useState(false);
+  const [score, setScore] = useState(0);
+
+  // Fetch cards and reset state
+  useEffect(() => {
+    if (!groupId) return;
+    setLoading(true);
+    apiClient.get(`/games/photo-memory/?group=${groupId}`)
+      .then((res: any) => {
+        setCards(res.data.cards.map((card: any, idx: number) => ({ ...card, idx })));
+        setFlipped([]);
+        setMatched([]);
+        setError('');
+        setTimer(60);
+        setGameOver(false);
+        setShowTimeout(false);
+        setScore(0);
+      })
+      .catch(() => setError('Failed to load cards.'))
+      .finally(() => setLoading(false));
+  }, [groupId, resetKey]);
+
+  // Timer logic
+  useEffect(() => {
+    if (loading || gameOver || error || !cards.length) return;
+    if (timer === 0) {
+      setShowTimeout(true);
+      setTimeout(() => {
+        setResetKey(k => k + 1);
+      }, 2000);
+      return;
+    }
+    const interval = setInterval(() => {
+      setTimer(t => t - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timer, loading, gameOver, error, cards.length]);
+
+  // Flip/match logic
+  const handleFlip = (idx: number) => {
+    if (flipped.length === 2 || flipped.includes(idx) || matched.includes(idx) || gameOver) return;
+    setFlipped(prev => [...prev, idx]);
+  };
+
+  useEffect(() => {
+    if (flipped.length === 2) {
+      const [first, second] = flipped;
+      if (cards[first].media === cards[second].media && first !== second) {
+        setTimeout(() => {
+          setMatched(prev => [...prev, first, second]);
+          setScore(prev => prev + 10);
+          setFlipped([]);
+        }, 800);
+      } else {
+        setTimeout(() => setFlipped([]), 1000);
+      }
+    }
+  }, [flipped, cards]);
+
+  useEffect(() => {
+    if (matched.length && matched.length === cards.length) {
+      setGameOver(true);
+    }
+  }, [matched, cards]);
+
+  if (loading) return <Box textAlign="center" py={4}><CircularProgress /></Box>;
+  if (error) return <Typography color="error">{error}</Typography>;
+  if (!cards.length) return <Typography>No images available for this group.</Typography>;
+
+  return (
+    <Box>
+      <Typography variant="h6" fontWeight="bold" mb={2}>Photo Memory Game</Typography>
+      <Box mb={2} display="flex" alignItems="center" gap={4}>
+        <Box display="flex" alignItems="center" gap={1}>
+          <MemoryIcon color="primary" />
+          <Typography variant="body1" fontWeight="bold">Time Left: {timer}s</Typography>
+        </Box>
+        <Box display="flex" alignItems="center" gap={1}>
+          <EmojiEventsIcon color="secondary" />
+          <Typography variant="body1" fontWeight="bold">Score: {score}</Typography>
+        </Box>
+      </Box>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 80px)', gap: 2, justifyContent: 'center' }}>
+        {cards.map((card, idx) => {
+          const isFlipped = flipped.includes(idx) || matched.includes(idx);
+          return (
+            <Box
+              key={idx}
+              sx={{ width: 80, height: 80, borderRadius: 2, boxShadow: 2, bgcolor: isFlipped ? 'white' : 'grey.300', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isFlipped ? 'default' : 'pointer', overflow: 'hidden', border: isFlipped ? '2px solid #4caf50' : '1px solid #e0e0e0' }}
+              onClick={() => handleFlip(idx)}
+            >
+              {isFlipped ? (
+                <img src={card.media} alt="memory" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <MemoryIcon sx={{ fontSize: 40, color: 'grey.500' }} />
+              )}
+            </Box>
+          );
+        })}
+      </Box>
+      {matched.length === cards.length && (
+        <Typography mt={3} color="success.main" fontWeight="bold">🎉 You matched all pairs! Final Score: {score}</Typography>
+      )}
+      {showTimeout && (
+        <Typography mt={3} color="error" fontWeight="bold">⏰ Time's up! The game will reset.</Typography>
+      )}
+    </Box>
+  );
+}
+
+function WordAssociationGame({ groupId }: { groupId: number }) {
+  const [words, setWords] = useState<string[]>([]);
+  const [currentWord, setCurrentWord] = useState('');
+  const [input, setInput] = useState('');
+  const [chain, setChain] = useState<string[]>([]);
+  const [score, setScore] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [gameOver, setGameOver] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
+  const [wrongAnswer, setWrongAnswer] = useState('');
+  const [correctAnswer, setCorrectAnswer] = useState('');
+
+    useEffect(() => {
+    if (!groupId) return;
+    setLoading(true);
+    setError('');
+    setInput('');
+    setChain([]);
+    setScore(0);
+    setGameOver(false);
+    setWrongAnswer('');
+    setCorrectAnswer('');
+
+    apiClient.get(`/games/word-association/?group=${groupId}`)
+      .then(response => {
+        const data = response.data;
+        if (data.words && data.words.length > 0) {
+          setWords(data.words);
+          setCurrentWord(data.words[0]);
+          // Initialize chain with the starting word
+          setChain([data.words[0]]);
+        } else {
+          setError('Not enough words in group posts to play.');
+        }
+      })
+      .catch((error) => {
+        console.error('Word Association API error:', error);
+        if (error.response && error.response.data && error.response.data.error) {
+          setError(error.response.data.error);
+        } else {
+          setError('Failed to load words.');
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [groupId, resetKey]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    const guess = input.trim().toLowerCase();
+    
+    if (words.includes(guess) && !chain.includes(guess) && guess !== currentWord) {
+      // Correct answer
+      setChain(prev => [...prev, guess]);
+      setCurrentWord(guess);
+      setInput('');
+      setScore(prev => prev + 1);
+      
+      // Check if all words have been used
+      if (chain.length + 1 >= words.length) {
+        setGameOver(true);
+        setCorrectAnswer('Congratulations! You used all the words!');
+      }
+    } else {
+      // Wrong answer
+      setWrongAnswer(guess);
+      setCorrectAnswer(words.find(w => w !== currentWord && !chain.includes(w)) || 'No more words available');
+      setGameOver(true);
+    }
+  };
+
+  const handleReset = () => setResetKey(k => k + 1);
+
+  if (loading) return <Box textAlign="center" py={4}><CircularProgress /></Box>;
+  if (error) return <Typography color="error">{error}</Typography>;
+  if (!words.length) return <Typography>No words available for this group.</Typography>;
+
+  return (
+    <Box>
+      <Typography variant="h6" fontWeight="bold" mb={2}>Word Association Game</Typography>
+      <Box mb={2} display="flex" alignItems="center" gap={4}>
+        <Box display="flex" alignItems="center" gap={1}>
+          <LinkIcon color="primary" />
+          <Typography variant="body1" fontWeight="bold">Score: {score}</Typography>
+        </Box>
+      </Box>
+      <Box mb={2}>
+        <Typography variant="body1">Current Word: <b>{currentWord}</b></Typography>
+      </Box>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <TextField
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          label="Next Associated Word"
+          disabled={gameOver}
+          autoFocus
+        />
+        <Button type="submit" variant="contained" disabled={gameOver}>Submit</Button>
+      </form>
+      <Box mt={3}>
+        <Typography variant="body2" color="text.secondary">
+          <strong>Chain:</strong> {chain.join(' → ')}
+        </Typography>
+      </Box>
+      {gameOver && (
+        <Box mt={3}>
+          <Typography color="error" fontWeight="bold" gutterBottom>
+            Game Over! Final Score: {score}
+          </Typography>
+          {wrongAnswer && (
+            <Typography color="error" variant="body2" gutterBottom>
+              Your answer: <strong>"{wrongAnswer}"</strong>
+            </Typography>
+          )}
+          {correctAnswer && (
+            <Typography color="success.main" variant="body2" gutterBottom>
+              {correctAnswer.startsWith('Congratulations') ? 
+                correctAnswer : 
+                `A correct answer would have been: <strong>"${correctAnswer}"</strong>`
+              }
+            </Typography>
+          )}
+          <Button onClick={handleReset} variant="outlined" sx={{ mt: 2 }}>Restart</Button>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+// Social Icebreaker Components
+function TwoTruthsLieGame({ game, onRefresh }: { game: any, onRefresh: () => void }) {
+  const [guessedLie, setGuessedLie] = useState<number | null>(null);
+  const [showResult, setShowResult] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleGuess = async (statementNumber: number) => {
+    if (game.has_guessed) return;
+    setLoading(true);
+    try {
+      await apiClient.post(`/games/two-truths-lie/${game.id}/guess/`, {
+        guessed_lie: statementNumber
+      });
+      setGuessedLie(statementNumber);
+      setShowResult(true);
+      onRefresh();
+    } catch (err: any) {
+      console.error('Failed to submit guess:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const statements = [
+    { number: 1, text: game.statement1 },
+    { number: 2, text: game.statement2 },
+    { number: 3, text: game.statement3 }
+  ];
+
+  return (
+    <Card sx={{ borderRadius: 2 }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h6" fontWeight="bold">
+            {game.user_username}'s Two Truths and a Lie
+          </Typography>
+          <Chip 
+            label={`${game.guess_count} guesses`} 
+            size="small" 
+            color="primary"
+          />
+        </Box>
+        
+        {!game.has_guessed && !showResult ? (
+          <Box>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Guess which statement is the lie:
+            </Typography>
+            {statements.map((statement) => (
+              <Button
+                key={statement.number}
+                variant="outlined"
+                fullWidth
+                onClick={() => handleGuess(statement.number)}
+                disabled={loading}
+                sx={{ mb: 1, justifyContent: 'flex-start', textAlign: 'left' }}
+              >
+                <Typography variant="body1">
+                  {statement.number}. {statement.text}
+                </Typography>
+              </Button>
+            ))}
+          </Box>
+        ) : (
+          <Box>
+            <Typography variant="h6" color={showResult && guessedLie === game.lie_statement ? "success.main" : "error"} mb={2}>
+              {showResult && guessedLie === game.lie_statement ? "✅ Correct!" : "❌ Wrong!"}
+            </Typography>
+            {statements.map((statement) => (
+              <Box
+                key={statement.number}
+                sx={{
+                  p: 2,
+                  mb: 1,
+                  borderRadius: 1,
+                  backgroundColor: statement.number === game.lie_statement ? 'error.light' : 'success.light',
+                  color: statement.number === game.lie_statement ? 'error.contrastText' : 'success.contrastText'
+                }}
+              >
+                <Typography variant="body1" fontWeight="bold">
+                  {statement.number}. {statement.text}
+                </Typography>
+                <Typography variant="body2">
+                  {statement.number === game.lie_statement ? "❌ This was the LIE" : "✅ This was TRUE"}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function WouldYouRatherPoll({ poll, onRefresh }: { poll: any, onRefresh: () => void }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleVote = async (choice: 'A' | 'B') => {
+    if (poll.has_voted) return;
+    setLoading(true);
+    try {
+      await apiClient.post(`/games/would-you-rather/${poll.id}/vote/`, {
+        choice: choice
+      });
+      onRefresh();
+    } catch (err: any) {
+      console.error('Failed to vote:', err);
+      if (err.response?.data) {
+        alert('Failed to vote: ' + JSON.stringify(err.response.data));
+      } else {
+        alert('Failed to vote. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalVotes = poll.option_a_votes + poll.option_b_votes;
+  const optionAPercent = totalVotes ? (poll.option_a_votes / totalVotes) * 100 : 0;
+  const optionBPercent = totalVotes ? (poll.option_b_votes / totalVotes) * 100 : 0;
+
+  return (
+    <Card sx={{ borderRadius: 2 }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h6" fontWeight="bold">
+            {poll.question}
+          </Typography>
+          <Chip 
+            label={`${totalVotes} votes`} 
+            size="small" 
+            color="primary"
+          />
+        </Box>
+        
+        {!poll.has_voted ? (
+          <Box>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Choose your preference:
+            </Typography>
+            <Box display="flex" gap={2}>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => handleVote('A')}
+                disabled={loading}
+                sx={{ py: 2 }}
+              >
+                <Typography variant="body1" fontWeight="bold">
+                  {poll.option_a}
+                </Typography>
+              </Button>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => handleVote('B')}
+                disabled={loading}
+                sx={{ py: 2 }}
+              >
+                <Typography variant="body1" fontWeight="bold">
+                  {poll.option_b}
+                </Typography>
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <Box>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Results:
+            </Typography>
+            <Box mb={2}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                <Typography variant="body1">{poll.option_a}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {poll.option_a_votes} votes ({optionAPercent.toFixed(0)}%)
+                </Typography>
+              </Box>
+              <LinearProgress variant="determinate" value={optionAPercent} sx={{ height: 10, borderRadius: 5 }} />
+            </Box>
+            <Box mb={2}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                <Typography variant="body1">{poll.option_b}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {poll.option_b_votes} votes ({optionBPercent.toFixed(0)}%)
+                </Typography>
+              </Box>
+              <LinearProgress variant="determinate" value={optionBPercent} sx={{ height: 10, borderRadius: 5 }} />
+            </Box>
+            {poll.user_choice && (
+              <Typography variant="body2" color="primary" fontWeight="bold">
+                You chose: {poll.user_choice === 'A' ? poll.option_a : poll.option_b}
+              </Typography>
+            )}
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ThisOrThatPoll({ poll, onRefresh }: { poll: any, onRefresh: () => void }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleVote = async (choice: 'A' | 'B') => {
+    if (poll.has_voted) return;
+    setLoading(true);
+    try {
+      await apiClient.post(`/games/this-or-that/${poll.id}/vote/`, {
+        choice: choice
+      });
+      onRefresh();
+    } catch (err: any) {
+      console.error('Failed to vote:', err);
+      if (err.response?.data) {
+        alert('Failed to vote: ' + JSON.stringify(err.response.data));
+      } else {
+        alert('Failed to vote. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalVotes = poll.option_a_votes + poll.option_b_votes;
+  const optionAPercent = totalVotes ? (poll.option_a_votes / totalVotes) * 100 : 0;
+  const optionBPercent = totalVotes ? (poll.option_b_votes / totalVotes) * 100 : 0;
+
+  return (
+    <Card sx={{ borderRadius: 2 }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h6" fontWeight="bold">
+            {poll.question}
+          </Typography>
+          <Chip 
+            label={`${totalVotes} votes`} 
+            size="small" 
+            color="primary"
+          />
+        </Box>
+        
+        {!poll.has_voted ? (
+          <Box>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Choose your preference:
+            </Typography>
+            <Box display="flex" gap={2}>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => handleVote('A')}
+                disabled={loading}
+                sx={{ py: 2 }}
+              >
+                <Typography variant="body1" fontWeight="bold">
+                  {poll.option_a}
+                </Typography>
+              </Button>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => handleVote('B')}
+                disabled={loading}
+                sx={{ py: 2 }}
+              >
+                <Typography variant="body1" fontWeight="bold">
+                  {poll.option_b}
+                </Typography>
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <Box>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Results:
+            </Typography>
+            <Box mb={2}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                <Typography variant="body1">{poll.option_a}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {poll.option_a_votes} votes ({optionAPercent.toFixed(0)}%)
+                </Typography>
+              </Box>
+              <LinearProgress variant="determinate" value={optionAPercent} sx={{ height: 10, borderRadius: 5 }} />
+            </Box>
+            <Box mb={2}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                <Typography variant="body1">{poll.option_b}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {poll.option_b_votes} votes ({optionBPercent.toFixed(0)}%)
+                </Typography>
+              </Box>
+              <LinearProgress variant="determinate" value={optionBPercent} sx={{ height: 10, borderRadius: 5 }} />
+            </Box>
+            {poll.user_choice && (
+              <Typography variant="body2" color="primary" fontWeight="bold">
+                You chose: {poll.user_choice === 'A' ? poll.option_a : poll.option_b}
+              </Typography>
+            )}
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function FillInBlankGame({ game, onRefresh }: { game: any, onRefresh: () => void }) {
+  const [response, setResponse] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [responses, setResponses] = useState<any[]>([]);
+  const [showResponses, setShowResponses] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!response.trim()) return;
+    setLoading(true);
+    try {
+      await apiClient.post(`/games/fill-in-blank/${game.id}/submit/`, {
+        filled_text: response.trim()
+      });
+      setResponse('');
+      onRefresh();
+    } catch (err: any) {
+      console.error('Failed to submit response:', err);
+      if (err.response?.data) {
+        alert('Failed to submit response: ' + JSON.stringify(err.response.data));
+      } else {
+        alert('Failed to submit response. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewResponses = async () => {
+    try {
+      const res = await apiClient.get(`/games/fill-in-blank/${game.id}/responses/`);
+      setResponses(res.data);
+      setShowResponses(true);
+    } catch (err: any) {
+      console.error('Failed to fetch responses:', err);
+    }
+  };
+
+  const displayText = game.template.replace('{blank}', '_____');
+
+  return (
+    <Card sx={{ borderRadius: 2 }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h6" fontWeight="bold">
+            Fill in the Blank
+          </Typography>
+          <Chip 
+            label={`${game.response_count} responses`} 
+            size="small" 
+            color="primary"
+          />
+        </Box>
+        
+        <Typography variant="body1" mb={2}>
+          {displayText}
+        </Typography>
+        
+        {!game.has_responded ? (
+          <form onSubmit={handleSubmit}>
+            <Box display="flex" gap={2}>
+              <TextField
+                fullWidth
+                value={response}
+                onChange={(e) => setResponse(e.target.value)}
+                placeholder="Your answer..."
+                variant="outlined"
+                size="small"
+              />
+              <Button type="submit" variant="contained" disabled={!response.trim() || loading} sx={{ borderRadius: 2 }}>
+                Submit
+              </Button>
+            </Box>
+          </form>
+        ) : (
+          <Box>
+            <Typography variant="body2" color="success.main" fontWeight="bold" mb={2}>
+              ✅ You responded: "{game.user_response}"
+            </Typography>
+            <Button variant="outlined" onClick={handleViewResponses} sx={{ borderRadius: 2 }}>
+              View All Responses
+            </Button>
+          </Box>
+        )}
+        
+        {showResponses && (
+          <Box mt={3}>
+            <Typography variant="h6" fontWeight="bold" mb={2}>
+              All Responses:
+            </Typography>
+            {responses.map((resp, index) => (
+              <Box key={resp.id} sx={{ p: 2, mb: 1, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 1 }}>
+                <Typography variant="body1" fontWeight="bold">
+                  {resp.user_username}:
+                </Typography>
+                <Typography variant="body1">
+                  {resp.filled_text}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 function LogoutButton() {
   const navigate = useNavigate();
@@ -2595,6 +4848,7 @@ function AppContent() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/posts" element={<Posts />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/games" element={<Games />} />
           </Routes>
         </Container>
         
