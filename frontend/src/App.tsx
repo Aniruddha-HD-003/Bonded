@@ -4103,7 +4103,7 @@ function Documentation() {
           gap: 1
         }}>
           <CodeIcon />
-          Bonded Social Platform - Complete Documentation (v1.1.0)
+          Bonded Social Platform - Complete Documentation (v1.2.0)
         </DialogTitle>
         <DialogContent sx={{ p: { xs: 1, sm: 3 } }}>
           <Box sx={{ maxHeight: '70vh', overflow: 'auto' }}>
@@ -4118,7 +4118,7 @@ function Documentation() {
                 <Typography paragraph>
                   <strong>Bonded</strong> is a modern, group-based social platform for sharing memories, planning events, and playing interactive games. Each group is isolated, with unique usernames per group. The platform now features a suite of social games, exclusive Cloudinary media storage, and a streamlined login flow (no group selection after login).
                 </Typography>
-                <Typography variant="h6" gutterBottom>Key Features (v1.1.0):</Typography>
+                <Typography variant="h6" gutterBottom>Key Features (v1.2.0):</Typography>
                 <List dense>
                   <ListItem>• Group-based social networking with isolated data</ListItem>
                   <ListItem>• Multi-group membership support</ListItem>
@@ -4527,7 +4527,7 @@ function AppContent() {
                 © 2025 Aniruddha H D. All rights reserved.
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                Version 1.1.0
+                Version 1.2.0
               </Typography>
             </Box>
           </Container>
