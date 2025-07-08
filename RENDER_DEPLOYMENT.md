@@ -91,7 +91,7 @@ Set these in your Render frontend service:
 # API Configuration (update with your backend URL)
 REACT_APP_API_URL=https://your-bonded-backend.onrender.com
 REACT_APP_ENVIRONMENT=production
-REACT_APP_VERSION=1.1.0
+REACT_APP_VERSION=1.2.0
 ```
 
 ## 🔄 Deployment Process

@@ -38,6 +38,8 @@ import {
   LinearProgress,
   MenuItem,
   Checkbox,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import { 
   Group as GroupIcon,
@@ -1226,6 +1228,9 @@ function Dashboard() {
     setPostToDelete(null);
   };
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   if (!selectedGroup) {
     return (
       <Card sx={{ 
@@ -1336,9 +1341,9 @@ function Dashboard() {
         </CardContent>
       </Card>
 
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 2, md: 3 } }}>
         {/* Members Section */}
-        <Box sx={{ width: { xs: '100%', md: '30%' } }}>
+        <Box sx={{ width: { xs: '100%', md: '30%' }, mb: { xs: 2, md: 0 } }}>
           <Card sx={{ 
             height: 'fit-content',
             background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
@@ -1363,7 +1368,10 @@ function Dashboard() {
                       <Avatar sx={{ 
                         mr: 2, 
                         background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
-                        fontWeight: 'bold'
+                        fontWeight: 'bold',
+                        width: { xs: 28, sm: 36 },
+                        height: { xs: 28, sm: 36 },
+                        fontSize: { xs: 16, sm: 20 }
                       }}>
                         {m.username.charAt(0).toUpperCase()}
                       </Avatar>
@@ -1402,7 +1410,7 @@ function Dashboard() {
             borderRadius: 3,
             boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
           }}>
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, md: 4 } }}>
               <Box display="flex" alignItems="center" mb={3}>
                 <PostAddIcon sx={{ mr: 1, fontSize: 28 }} />
                 <Typography variant="h6" fontWeight="bold">Posts</Typography>
@@ -1570,7 +1578,7 @@ function Dashboard() {
                               src={p.media_url} 
                               alt="Post content" 
                               style={{ 
-                                width: '100%', 
+                                maxWidth: '100%', 
                                 maxHeight: '500px', 
                                 objectFit: 'cover',
                                 borderRadius: '8px'
@@ -1585,7 +1593,7 @@ function Dashboard() {
                               src={p.media_url} 
                               controls 
                               style={{ 
-                                width: '100%', 
+                                maxWidth: '100%', 
                                 maxHeight: '500px',
                                 borderRadius: '8px'
                               }} 
@@ -1789,6 +1797,7 @@ function Dashboard() {
             width: '100%'
           }
         }}
+        fullScreen={isMobile}
       >
         <DialogTitle sx={{ 
           background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
@@ -1800,7 +1809,7 @@ function Dashboard() {
           <DeleteIcon />
           Delete Post
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogContent sx={{ p: { xs: 1.5, sm: 3 } }}>
           <Typography variant="body1" gutterBottom>
             Are you sure you want to delete this post?
           </Typography>
@@ -1815,7 +1824,7 @@ function Dashboard() {
             This action cannot be undone. All comments and reactions will also be deleted.
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ p: 3, gap: 1 }}>
+        <DialogActions sx={{ p: { xs: 1.5, sm: 3 }, gap: 1 }}>
           <Button 
             onClick={cancelDeletePost}
             variant="outlined"
@@ -1951,6 +1960,9 @@ function Games() {
   const [newFillInBlank, setNewFillInBlank] = useState({
     template: ''
   });
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const fetchGamesData = () => {
     if (!selectedGroup) return;
@@ -2364,10 +2376,9 @@ function Games() {
             sx={{
               '& .MuiTab-root': {
                 fontWeight: 'bold',
-                fontSize: '0.9rem',
-                textTransform: 'none',
-                minHeight: 64,
-                minWidth: 120
+                fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                minHeight: { xs: 48, sm: 64 },
+                minWidth: { xs: 80, sm: 120 }
               }
             }}
           >
@@ -2394,16 +2405,16 @@ function Games() {
             <Tab icon={<CompareArrowsIcon />} label="This or That" iconPosition="start" />
             <Tab icon={<CreateIcon />} label="Fill in Blank" iconPosition="start" />
           </Tabs>
-          <Box sx={{ textAlign: 'center', py: 1, color: 'text.secondary', fontSize: '0.8rem' }}>
+          <Box sx={{ textAlign: 'center', py: 1, color: 'text.secondary', fontSize: { xs: '0.7rem', sm: '0.8rem' } }}>
             ← Scroll to see all game types →
           </Box>
         </Box>
 
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
           {/* Challenges Tab */}
           {activeTab === 0 && (
             <Box>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+              <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'stretch', sm: 'center' }} mb={3} gap={1}>
                 <Typography variant="h6" fontWeight="bold">Active Challenges</Typography>
                 <Button
                   variant="contained"
@@ -2411,7 +2422,8 @@ function Games() {
                   onClick={() => setShowCreateChallenge(true)}
                   sx={{
                     background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
-                    borderRadius: 2
+                    borderRadius: 2,
+                    width: { xs: '100%', sm: 'auto' }
                   }}
                 >
                   Create Challenge
@@ -2930,12 +2942,13 @@ function Games() {
         onClose={() => setShowCreateChallenge(false)}
         maxWidth="sm"
         fullWidth
+        fullScreen={isMobile}
       >
         <DialogTitle>
           <Typography variant="h6" fontWeight="bold">Create New Challenge</Typography>
         </DialogTitle>
         <form onSubmit={handleCreateChallenge}>
-          <DialogContent>
+          <DialogContent sx={{ p: { xs: 1, sm: 2 } }}>
             <TextField
               fullWidth
               label="Challenge Title"
@@ -3028,7 +3041,7 @@ function Games() {
               />
             </Box>
           </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
+          <DialogActions sx={{ p: { xs: 1, sm: 2 } }}>
             <Button onClick={() => setShowCreateChallenge(false)}>
               Cancel
             </Button>
@@ -3077,12 +3090,13 @@ function Games() {
         onClose={() => setShowCreateTwoTruthsLie(false)}
         maxWidth="sm"
         fullWidth
+        fullScreen={isMobile}
       >
         <DialogTitle>
           <Typography variant="h6" fontWeight="bold">Create Two Truths and a Lie</Typography>
         </DialogTitle>
         <form onSubmit={handleCreateTwoTruthsLie}>
-          <DialogContent>
+          <DialogContent sx={{ p: { xs: 1, sm: 2 } }}>
             <Typography variant="body2" color="text.secondary" mb={2}>
               Write three statements about yourself - two true and one false. Others will try to guess which one is the lie!
             </Typography>
@@ -3124,7 +3138,7 @@ function Games() {
               <MenuItem value={3}>Statement 3</MenuItem>
             </TextField>
           </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
+          <DialogActions sx={{ p: { xs: 1, sm: 2 } }}>
             <Button onClick={() => setShowCreateTwoTruthsLie(false)}>Cancel</Button>
             <Button type="submit" variant="contained" sx={{
               background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
@@ -3142,12 +3156,13 @@ function Games() {
         onClose={() => setShowCreateWouldYouRather(false)}
         maxWidth="sm"
         fullWidth
+        fullScreen={isMobile}
       >
         <DialogTitle>
           <Typography variant="h6" fontWeight="bold">Create Would You Rather Poll</Typography>
         </DialogTitle>
         <form onSubmit={handleCreateWouldYouRather}>
-          <DialogContent>
+          <DialogContent sx={{ p: { xs: 1, sm: 2 } }}>
             <TextField
               fullWidth
               label="Question"
@@ -3174,7 +3189,7 @@ function Games() {
               required
             />
           </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
+          <DialogActions sx={{ p: { xs: 1, sm: 2 } }}>
             <Button onClick={() => setShowCreateWouldYouRather(false)}>Cancel</Button>
             <Button type="submit" variant="contained" sx={{
               background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
@@ -3192,12 +3207,13 @@ function Games() {
         onClose={() => setShowCreateThisOrThat(false)}
         maxWidth="sm"
         fullWidth
+        fullScreen={isMobile}
       >
         <DialogTitle>
           <Typography variant="h6" fontWeight="bold">Create This or That Poll</Typography>
         </DialogTitle>
         <form onSubmit={handleCreateThisOrThat}>
-          <DialogContent>
+          <DialogContent sx={{ p: { xs: 1, sm: 2 } }}>
             <TextField
               fullWidth
               label="Question"
@@ -3224,7 +3240,7 @@ function Games() {
               required
             />
           </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
+          <DialogActions sx={{ p: { xs: 1, sm: 2 } }}>
             <Button onClick={() => setShowCreateThisOrThat(false)}>Cancel</Button>
             <Button type="submit" variant="contained" sx={{
               background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
@@ -3242,12 +3258,13 @@ function Games() {
         onClose={() => setShowCreateFillInBlank(false)}
         maxWidth="sm"
         fullWidth
+        fullScreen={isMobile}
       >
         <DialogTitle>
           <Typography variant="h6" fontWeight="bold">Create Fill in the Blank</Typography>
         </DialogTitle>
         <form onSubmit={handleCreateFillInBlank}>
-          <DialogContent>
+          <DialogContent sx={{ p: { xs: 1, sm: 2 } }}>
             <Typography variant="body2" color="text.secondary" mb={2}>
               Create a sentence with a blank that others will fill in. Use {"{blank}"} to indicate where the blank should be.
             </Typography>
@@ -3263,7 +3280,7 @@ function Games() {
               rows={3}
             />
           </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
+          <DialogActions sx={{ p: { xs: 1, sm: 2 } }}>
             <Button onClick={() => setShowCreateFillInBlank(false)}>Cancel</Button>
             <Button type="submit" variant="contained" sx={{
               background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
@@ -4069,13 +4086,15 @@ function Documentation() {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   return (
     <>
       <Button color="inherit" onClick={handleOpen} sx={{ ml: 2 }}>
         <HelpIcon sx={{ mr: 1, fontSize: 20 }} />
         Documentation
       </Button>
-      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth fullScreen={isMobile}>
         <DialogTitle sx={{ 
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
@@ -4086,7 +4105,7 @@ function Documentation() {
           <CodeIcon />
           Bonded Social Platform - Complete Documentation (v1.1.0)
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogContent sx={{ p: { xs: 1, sm: 3 } }}>
           <Box sx={{ maxHeight: '70vh', overflow: 'auto' }}>
             {/* Overview */}
             <Accordion defaultExpanded>
@@ -4463,7 +4482,7 @@ function AppContent() {
         </AppBar>
         {/* Spacer to prevent content from being hidden behind fixed header */}
         <Toolbar />
-        <Container sx={{ mt: 4, mb: 8, minHeight: 'calc(100vh - 140px)' }}>
+        <Container sx={{ mt: { xs: 2, md: 4 }, mb: { xs: 7, md: 8 }, minHeight: { xs: 'calc(100vh - 120px)', md: 'calc(100vh - 140px)' }, px: { xs: 1, sm: 2, md: 3 } }}>
           {/* Removed <GroupSelector /> */}
           <Routes>
             <Route path="/" element={<HomePage />} />
