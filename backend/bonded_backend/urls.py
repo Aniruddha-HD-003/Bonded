@@ -24,4 +24,5 @@ urlpatterns = [
     path('api/reactions/', include('reactions.urls')),
     path('api/comments/', include('comments.urls')),
     path('api/events/', include('events.urls')),
+    path('api/games/', include('games.urls')),
 ]

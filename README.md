@@ -192,7 +192,7 @@ CLOUDINARY_API_SECRET=your_api_secret
 ```bash
 REACT_APP_API_URL=https://your-backend-domain.com/api
 REACT_APP_ENVIRONMENT=production
-REACT_APP_VERSION=1.0.0
+REACT_APP_VERSION=1.2.0
 ```
 
 ## 🤝 Contributing
@@ -243,5 +243,5 @@ without explicit written permission from the author.
 
 **Built with ❤️ by the Bonded Development Team**
 
-**Version:** 1.0.0  
+**Version:** 1.2.0  
 **Last Updated:** June 2025 

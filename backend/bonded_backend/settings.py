@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'events',
     'reactions',
     'comments',
+    'games',
 ]
 
 MIDDLEWARE = [
