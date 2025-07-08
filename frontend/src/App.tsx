@@ -4066,46 +4066,16 @@ function AuthGate() {
 }
 
 function Documentation() {
-  const [open, setOpen] = useState(false);
-
+  const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
   return (
     <>
-      <Button 
-        color="inherit" 
-        onClick={handleOpen} 
-        sx={{ 
-          ml: 2,
-          background: 'rgba(255,255,255,0.1)',
-          borderRadius: 2,
-          px: 2,
-          border: '1px solid rgba(255,255,255,0.2)',
-          transition: 'all 0.2s',
-          '&:hover': {
-            background: 'rgba(255,255,255,0.2)',
-            transform: 'translateY(-1px)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-          }
-        }}
-      >
+      <Button color="inherit" onClick={handleOpen} sx={{ ml: 2 }}>
         <HelpIcon sx={{ mr: 1, fontSize: 20 }} />
         Documentation
       </Button>
-
-      <Dialog 
-        open={open} 
-        onClose={handleClose} 
-        maxWidth="lg" 
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            maxHeight: '90vh'
-          }
-        }}
-      >
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle sx={{ 
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
@@ -4114,12 +4084,10 @@ function Documentation() {
           gap: 1
         }}>
           <CodeIcon />
-          Bonded Social Platform - Complete Documentation
+          Bonded Social Platform - Complete Documentation (v1.1.0)
         </DialogTitle>
-        
         <DialogContent sx={{ p: 3 }}>
           <Box sx={{ maxHeight: '70vh', overflow: 'auto' }}>
-            
             {/* Overview */}
             <Accordion defaultExpanded>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -4129,23 +4097,22 @@ function Documentation() {
               </AccordionSummary>
               <AccordionDetails>
                 <Typography paragraph>
-                  <strong>Bonded</strong> is a production-grade social platform designed for groups of friends to share memories, 
-                  plan trips/goals/meetings, and interact via posts, likes, and reactions. The platform features group isolation 
-                  where the same username can exist in different groups but must be unique within a group.
+                  <strong>Bonded</strong> is a modern, group-based social platform for sharing memories, planning events, and playing interactive games. Each group is isolated, with unique usernames per group. The platform now features a suite of social games, exclusive Cloudinary media storage, and a streamlined login flow (no group selection after login).
                 </Typography>
-                <Typography variant="h6" gutterBottom>Key Features:</Typography>
+                <Typography variant="h6" gutterBottom>Key Features (v1.1.0):</Typography>
                 <List dense>
-                  <ListItem>• Group-based social networking</ListItem>
+                  <ListItem>• Group-based social networking with isolated data</ListItem>
                   <ListItem>• Multi-group membership support</ListItem>
-                  <ListItem>• Post creation and interaction</ListItem>
+                  <ListItem>• Post creation with text and media (Cloudinary only)</ListItem>
                   <ListItem>• Event planning (trips, goals, meetings)</ListItem>
                   <ListItem>• Real-time reactions and comments</ListItem>
-                  <ListItem>• JWT-based authentication</ListItem>
-                  <ListItem>• Responsive Material-UI design</ListItem>
+                  <ListItem>• Social games: Photo Memory, Word Association, Polls, Two Truths and a Lie, Would You Rather, This or That, Fill in the Blank, Creative Challenges, Streaks, Leaderboards, Achievements</ListItem>
+                  <ListItem>• JWT-based authentication with improved error handling</ListItem>
+                  <ListItem>• Responsive Material-UI design with modern UI/UX (fixed footer, tabs, etc.)</ListItem>
+                  <ListItem>• No group selection after login—auto-selects based on credentials</ListItem>
                 </List>
               </AccordionDetails>
             </Accordion>
-
             {/* Architecture */}
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -4158,12 +4125,11 @@ function Documentation() {
                 <List dense>
                   <ListItem>• <strong>Django 5.2.3</strong> - Web framework</ListItem>
                   <ListItem>• <strong>Django REST Framework 3.16.0</strong> - API framework</ListItem>
-                  <ListItem>• <strong>PostgreSQL</strong> - Database (Docker)</ListItem>
+                  <ListItem>• <strong>PostgreSQL</strong> - Database</ListItem>
+                  <ListItem>• <strong>Cloudinary</strong> - Media storage (all media is stored and loaded from Cloudinary)</ListItem>
                   <ListItem>• <strong>JWT Authentication</strong> - Security</ListItem>
-                  <ListItem>• <strong>Cloudinary</strong> - Media storage</ListItem>
                   <ListItem>• <strong>CORS</strong> - Cross-origin support</ListItem>
                 </List>
-                
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Frontend Stack:</Typography>
                 <List dense>
                   <ListItem>• <strong>React 19.1.0</strong> - UI library</ListItem>
@@ -4174,7 +4140,6 @@ function Documentation() {
                 </List>
               </AccordionDetails>
             </Accordion>
-
             {/* Database Models */}
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -4185,72 +4150,16 @@ function Documentation() {
               </AccordionSummary>
               <AccordionDetails>
                 <Typography variant="h6" gutterBottom>Core Models:</Typography>
-                
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="primary">User Model</Typography>
-                    <Typography variant="body2">
-                      Custom user model with email, password, and group membership relationships.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="primary">Group Model</Typography>
-                    <Typography variant="body2">
-                      Represents social groups with name and member relationships.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="primary">GroupMembership Model</Typography>
-                    <Typography variant="body2">
-                      Junction table linking users to groups with username and role per group.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="primary">Post Model</Typography>
-                    <Typography variant="body2">
-                      User posts with text content, group association, and media support.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="primary">Event Model</Typography>
-                    <Typography variant="body2">
-                      Events with title, type (trip/goal/meeting), start_time, and group association.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="primary">Comment Model</Typography>
-                    <Typography variant="body2">
-                      Comments on posts with text content and user association.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="primary">Reaction Model</Typography>
-                    <Typography variant="body2">
-                      User reactions to posts (like, love, laugh, wow, sad, angry).
-                    </Typography>
-                  </CardContent>
-                </Card>
+                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">User</Typography><Typography variant="body2">Custom user model with email, password, and group memberships.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Group</Typography><Typography variant="body2">Represents social groups with name and member relationships.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">GroupMembership</Typography><Typography variant="body2">Links users to groups with username and role per group.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Post</Typography><Typography variant="body2">User posts with text, group, and Cloudinary media.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Event</Typography><Typography variant="body2">Events with title, type, start_time, and group association.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Comment</Typography><Typography variant="body2">Comments on posts with text and user association.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Reaction</Typography><Typography variant="body2">User reactions to posts (like, love, laugh, wow, sad, angry).</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Game & Challenge Models</Typography><Typography variant="body2">Photo Memory, Word Association, Poll, Two Truths and a Lie, Would You Rather, This or That, Fill in the Blank, Creative Challenges, Streaks, Leaderboards, Achievements, and related user/game state models.</Typography></CardContent></Card>
               </AccordionDetails>
             </Accordion>
-
             {/* API Endpoints */}
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -4260,163 +4169,42 @@ function Documentation() {
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <Typography variant="h6" gutterBottom>Authentication Endpoints:</Typography>
-                <TableContainer component={Paper} sx={{ mb: 2 }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell><strong>Method</strong></TableCell>
-                        <TableCell><strong>Endpoint</strong></TableCell>
-                        <TableCell><strong>Description</strong></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>POST</TableCell>
-                        <TableCell>/api/users/register-group/</TableCell>
-                        <TableCell>Register a new group with members</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>POST</TableCell>
-                        <TableCell>/api/users/group-login/</TableCell>
-                        <TableCell>Login with group, username, password</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>POST</TableCell>
-                        <TableCell>/api/users/change-credentials/</TableCell>
-                        <TableCell>Change username and password</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-
-                <Typography variant="h6" gutterBottom>Group Management:</Typography>
-                <TableContainer component={Paper} sx={{ mb: 2 }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell><strong>Method</strong></TableCell>
-                        <TableCell><strong>Endpoint</strong></TableCell>
-                        <TableCell><strong>Description</strong></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>GET</TableCell>
-                        <TableCell>/api/users/groups/{'{group_id}'}/members/</TableCell>
-                        <TableCell>Get group members</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-
-                <Typography variant="h6" gutterBottom>Posts:</Typography>
-                <TableContainer component={Paper} sx={{ mb: 2 }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell><strong>Method</strong></TableCell>
-                        <TableCell><strong>Endpoint</strong></TableCell>
-                        <TableCell><strong>Description</strong></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>GET</TableCell>
-                        <TableCell>/api/posts/?group={'{group_id}'}</TableCell>
-                        <TableCell>Get posts for a group</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>POST</TableCell>
-                        <TableCell>/api/posts/</TableCell>
-                        <TableCell>Create a new post</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-
-                <Typography variant="h6" gutterBottom>Events:</Typography>
-                <TableContainer component={Paper} sx={{ mb: 2 }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell><strong>Method</strong></TableCell>
-                        <TableCell><strong>Endpoint</strong></TableCell>
-                        <TableCell><strong>Description</strong></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>GET</TableCell>
-                        <TableCell>/api/events/?group={'{group_id}'}</TableCell>
-                        <TableCell>Get events for a group</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>POST</TableCell>
-                        <TableCell>/api/events/</TableCell>
-                        <TableCell>Create a new event</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-
-                <Typography variant="h6" gutterBottom>Comments:</Typography>
-                <TableContainer component={Paper} sx={{ mb: 2 }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell><strong>Method</strong></TableCell>
-                        <TableCell><strong>Endpoint</strong></TableCell>
-                        <TableCell><strong>Description</strong></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>GET</TableCell>
-                        <TableCell>/api/comments/post/{'{post_id}'}/</TableCell>
-                        <TableCell>Get comments for a post</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>POST</TableCell>
-                        <TableCell>/api/comments/post/{'{post_id}'}/</TableCell>
-                        <TableCell>Add a comment to a post</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-
-                <Typography variant="h6" gutterBottom>Reactions:</Typography>
-                <TableContainer component={Paper}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell><strong>Method</strong></TableCell>
-                        <TableCell><strong>Endpoint</strong></TableCell>
-                        <TableCell><strong>Description</strong></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>GET</TableCell>
-                        <TableCell>/api/reactions/post/{'{post_id}'}/</TableCell>
-                        <TableCell>Get reactions for a post</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>POST</TableCell>
-                        <TableCell>/api/reactions/post/{'{post_id}'}/</TableCell>
-                        <TableCell>Add/change reaction to a post</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>DELETE</TableCell>
-                        <TableCell>/api/reactions/post/{'{post_id}'}/</TableCell>
-                        <TableCell>Remove reaction from a post</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                <Typography variant="h6" gutterBottom>Authentication & Group Endpoints:</Typography>
+                <TableContainer component={Paper} sx={{ mb: 2 }}><Table size="small"><TableHead><TableRow><TableCell><strong>Method</strong></TableCell><TableCell><strong>Endpoint</strong></TableCell><TableCell><strong>Description</strong></TableCell></TableRow></TableHead><TableBody>
+                  <TableRow><TableCell>POST</TableCell><TableCell>/api/users/register-group/</TableCell><TableCell>Register a new group with members</TableCell></TableRow>
+                  <TableRow><TableCell>POST</TableCell><TableCell>/api/users/group-login/</TableCell><TableCell>Login with group, username, password</TableCell></TableRow>
+                  <TableRow><TableCell>POST</TableCell><TableCell>/api/users/change-credentials/</TableCell><TableCell>Change username and password</TableCell></TableRow>
+                  <TableRow><TableCell>GET</TableCell><TableCell>/api/users/groups/{'{group_id}'}/members/</TableCell><TableCell>Get group members</TableCell></TableRow>
+                </TableBody></Table></TableContainer>
+                <Typography variant="h6" gutterBottom>Posts, Events, Comments, Reactions:</Typography>
+                <TableContainer component={Paper} sx={{ mb: 2 }}><Table size="small"><TableHead><TableRow><TableCell><strong>Method</strong></TableCell><TableCell><strong>Endpoint</strong></TableCell><TableCell><strong>Description</strong></TableCell></TableRow></TableHead><TableBody>
+                  <TableRow><TableCell>GET</TableCell><TableCell>/api/posts/?group={'{group_id}'}</TableCell><TableCell>Get posts for a group</TableCell></TableRow>
+                  <TableRow><TableCell>POST</TableCell><TableCell>/api/posts/</TableCell><TableCell>Create a new post</TableCell></TableRow>
+                  <TableRow><TableCell>GET</TableCell><TableCell>/api/events/?group={'{group_id}'}</TableCell><TableCell>Get events for a group</TableCell></TableRow>
+                  <TableRow><TableCell>POST</TableCell><TableCell>/api/events/</TableCell><TableCell>Create a new event</TableCell></TableRow>
+                  <TableRow><TableCell>GET</TableCell><TableCell>/api/comments/post/{'{post_id}'}/</TableCell><TableCell>Get comments for a post</TableCell></TableRow>
+                  <TableRow><TableCell>POST</TableCell><TableCell>/api/comments/post/{'{post_id}'}/</TableCell><TableCell>Add a comment to a post</TableCell></TableRow>
+                  <TableRow><TableCell>GET</TableCell><TableCell>/api/reactions/post/{'{post_id}'}/</TableCell><TableCell>Get reactions for a post</TableCell></TableRow>
+                  <TableRow><TableCell>POST</TableCell><TableCell>/api/reactions/post/{'{post_id}'}/</TableCell><TableCell>Add/change reaction to a post</TableCell></TableRow>
+                  <TableRow><TableCell>DELETE</TableCell><TableCell>/api/reactions/post/{'{post_id}'}/</TableCell><TableCell>Remove reaction from a post</TableCell></TableRow>
+                </TableBody></Table></TableContainer>
+                <Typography variant="h6" gutterBottom>Games & Challenges:</Typography>
+                <TableContainer component={Paper} sx={{ mb: 2 }}><Table size="small"><TableHead><TableRow><TableCell><strong>Method</strong></TableCell><TableCell><strong>Endpoint</strong></TableCell><TableCell><strong>Description</strong></TableCell></TableRow></TableHead><TableBody>
+                  <TableRow><TableCell>GET</TableCell><TableCell>/api/games/photo-memory/?group={'{group_id}'}</TableCell><TableCell>Get shuffled cards for Photo Memory game</TableCell></TableRow>
+                  <TableRow><TableCell>GET</TableCell><TableCell>/api/games/word-association/?group={'{group_id}'}</TableCell><TableCell>Get words for Word Association game</TableCell></TableRow>
+                  <TableRow><TableCell>GET/POST</TableCell><TableCell>/api/games/polls/?group={'{group_id}'}</TableCell><TableCell>Get or create polls</TableCell></TableRow>
+                  <TableRow><TableCell>GET/POST</TableCell><TableCell>/api/games/two-truths-lie/?group={'{group_id}'}</TableCell><TableCell>Get or create Two Truths and a Lie games</TableCell></TableRow>
+                  <TableRow><TableCell>GET/POST</TableCell><TableCell>/api/games/would-you-rather/?group={'{group_id}'}</TableCell><TableCell>Get or create Would You Rather polls</TableCell></TableRow>
+                  <TableRow><TableCell>GET/POST</TableCell><TableCell>/api/games/this-or-that/?group={'{group_id}'}</TableCell><TableCell>Get or create This or That polls</TableCell></TableRow>
+                  <TableRow><TableCell>GET/POST</TableCell><TableCell>/api/games/fill-in-blank/?group={'{group_id}'}</TableCell><TableCell>Get or create Fill in the Blank games</TableCell></TableRow>
+                  <TableRow><TableCell>GET/POST</TableCell><TableCell>/api/games/creative-challenges/?group={'{group_id}'}</TableCell><TableCell>Get or create Creative Challenges</TableCell></TableRow>
+                  <TableRow><TableCell>GET</TableCell><TableCell>/api/games/streaks/?group={'{group_id}'}</TableCell><TableCell>Get user streaks</TableCell></TableRow>
+                  <TableRow><TableCell>GET</TableCell><TableCell>/api/games/leaderboard-entries/?group={'{group_id}'}</TableCell><TableCell>Get leaderboard entries</TableCell></TableRow>
+                  <TableRow><TableCell>GET</TableCell><TableCell>/api/games/user-stats/?group={'{group_id}'}</TableCell><TableCell>Get user stats</TableCell></TableRow>
+                  <TableRow><TableCell>GET</TableCell><TableCell>/api/games/user-achievements/?group={'{group_id}'}</TableCell><TableCell>Get user achievements</TableCell></TableRow>
+                </TableBody></Table></TableContainer>
               </AccordionDetails>
             </Accordion>
-
             {/* Frontend Components */}
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -4427,82 +4215,23 @@ function Documentation() {
               </AccordionSummary>
               <AccordionDetails>
                 <Typography variant="h6" gutterBottom>Core Components:</Typography>
-                
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="success.main">App Component</Typography>
-                    <Typography variant="body2">
-                      Main application component with routing, authentication gate, and global state management.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="success.main">GroupProvider & GroupContext</Typography>
-                    <Typography variant="body2">
-                      React Context for managing group memberships and selected group state across the application.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="success.main">Onboarding Component</Typography>
-                    <Typography variant="body2">
-                      Group registration form with credential generation and sharing functionality.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="success.main">Login Component</Typography>
-                    <Typography variant="body2">
-                      Group-based login form with credential change flow integration.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="success.main">Dashboard Component</Typography>
-                    <Typography variant="body2">
-                      Main dashboard showing group members, posts, events, and creation forms with futuristic UI.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="success.main">Comments Component</Typography>
-                    <Typography variant="body2">
-                      Comment display and creation with real-time updates and user avatars.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="success.main">Reactions Component</Typography>
-                    <Typography variant="body2">
-                      Interactive reaction buttons with emoji icons and real-time count updates.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Key Features:</Typography>
+                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">App Component</Typography><Typography variant="body2">Main application component with routing, authentication gate, and global state management.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">GroupProvider & GroupContext</Typography><Typography variant="body2">React Context for managing group memberships and selected group state across the application. Group selection is now automatic after login.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">Onboarding Component</Typography><Typography variant="body2">Group registration form with credential generation and sharing functionality.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">Login Component</Typography><Typography variant="body2">Group-based login form with credential change flow integration. No manual group selection after login.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">Dashboard Component</Typography><Typography variant="body2">Main dashboard showing group members, posts, events, and creation forms with modern UI.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">Games Component</Typography><Typography variant="body2">Tab-based interface for all social games, including Photo Memory, Word Association, Polls, and more.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">Comments & Reactions Components</Typography><Typography variant="body2">Real-time comment and reaction display and creation with user avatars and emoji icons.</Typography></CardContent></Card>
+                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Key UI Features:</Typography>
                 <List dense>
-                  <ListItem>• <strong>Responsive Design</strong> - Mobile-first approach with Material-UI</ListItem>
-                  <ListItem>• <strong>Futuristic UI</strong> - Gradient backgrounds, glassmorphism effects, animations</ListItem>
+                  <ListItem>• <strong>Responsive Design</strong> - Mobile-first with Material-UI</ListItem>
+                  <ListItem>• <strong>Modern UI/UX</strong> - Gradient backgrounds, glassmorphism, fixed footer, tabs</ListItem>
                   <ListItem>• <strong>Real-time Updates</strong> - Automatic data refresh after actions</ListItem>
-                  <ListItem>• <strong>Error Handling</strong> - Comprehensive error states and user feedback</ListItem>
                   <ListItem>• <strong>Authentication Flow</strong> - JWT token management with automatic logout</ListItem>
                   <ListItem>• <strong>Group Isolation</strong> - Complete separation of data between groups</ListItem>
                 </List>
               </AccordionDetails>
             </Accordion>
-
             {/* Security Features */}
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -4520,7 +4249,6 @@ function Documentation() {
                   <ListItem>• <strong>Token Expiration</strong> - Automatic logout on token expiry</ListItem>
                   <ListItem>• <strong>CORS Protection</strong> - Cross-origin request security</ListItem>
                 </List>
-
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Data Protection:</Typography>
                 <List dense>
                   <ListItem>• <strong>Input Validation</strong> - Server-side validation for all inputs</ListItem>
@@ -4530,7 +4258,6 @@ function Documentation() {
                 </List>
               </AccordionDetails>
             </Accordion>
-
             {/* Installation & Setup */}
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -4546,12 +4273,8 @@ function Documentation() {
                   <ListItem>• PostgreSQL (Docker recommended)</ListItem>
                   <ListItem>• Cloudinary account (for media storage)</ListItem>
                 </List>
-
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Backend Setup:</Typography>
-                <Card sx={{ mb: 2, background: 'rgba(255, 193, 7, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>
-{`# Clone repository
+                <Card sx={{ mb: 2, background: 'rgba(255, 193, 7, 0.1)' }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>{`# Clone repository
 git clone <repository-url>
 cd bonded/backend
 
@@ -4573,27 +4296,16 @@ python manage.py migrate
 python manage.py createsuperuser
 
 # Run development server
-python manage.py runserver`}
-                    </Typography>
-                  </CardContent>
-                </Card>
-
+python manage.py runserver`}</Typography></CardContent></Card>
                 <Typography variant="h6" gutterBottom>Frontend Setup:</Typography>
-                <Card sx={{ mb: 2, background: 'rgba(255, 193, 7, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>
-{`# Navigate to frontend directory
+                <Card sx={{ mb: 2, background: 'rgba(255, 193, 7, 0.1)' }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>{`# Navigate to frontend directory
 cd ../frontend
 
 # Install dependencies
 npm install
 
 # Start development server
-npm start`}
-                    </Typography>
-                  </CardContent>
-                </Card>
-
+npm start`}</Typography></CardContent></Card>
                 <Typography variant="h6" gutterBottom>Environment Configuration:</Typography>
                 <List dense>
                   <ListItem>• Update <code>settings.py</code> with your database credentials</ListItem>
@@ -4603,7 +4315,6 @@ npm start`}
                 </List>
               </AccordionDetails>
             </Accordion>
-
             {/* API Usage Examples */}
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -4613,10 +4324,7 @@ npm start`}
               </AccordionSummary>
               <AccordionDetails>
                 <Typography variant="h6" gutterBottom>Authentication Flow:</Typography>
-                <Card sx={{ mb: 2, background: 'rgba(156, 39, 176, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>
-{`// 1. Register a group
+                <Card sx={{ mb: 2, background: 'rgba(156, 39, 176, 0.1)' }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>{`// 1. Register a group
 POST /api/users/register-group/
 {
   "group_name": "My Friends",
@@ -4632,16 +4340,9 @@ POST /api/users/group-login/
 }
 
 // 3. Use JWT token in subsequent requests
-Authorization: Bearer <jwt_token>`}
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Typography variant="h6" gutterBottom>Creating Content:</Typography>
-                <Card sx={{ mb: 2, background: 'rgba(156, 39, 176, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>
-{`// Create a post
+Authorization: Bearer <jwt_token>`}</Typography></CardContent></Card>
+                <Typography variant="h6" gutterBottom>Creating Content & Playing Games:</Typography>
+                <Card sx={{ mb: 2, background: 'rgba(156, 39, 176, 0.1)' }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>{`// Create a post
 POST /api/posts/
 {
   "text": "Hello everyone!",
@@ -4667,13 +4368,16 @@ POST /api/comments/post/1/
 POST /api/reactions/post/1/
 {
   "type": "like"
-}`}
-                    </Typography>
-                  </CardContent>
-                </Card>
+}
+
+// Get Photo Memory game cards
+GET /api/games/photo-memory/?group=1
+
+// Get Word Association words
+GET /api/games/word-association/?group=1
+`}</Typography></CardContent></Card>
               </AccordionDetails>
             </Accordion>
-
             {/* Troubleshooting */}
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -4683,45 +4387,13 @@ POST /api/reactions/post/1/
               </AccordionSummary>
               <AccordionDetails>
                 <Typography variant="h6" gutterBottom>Common Issues:</Typography>
-                
-                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="error">Database Connection Issues</Typography>
-                    <Typography variant="body2">
-                      Ensure PostgreSQL is running and credentials in settings.py are correct.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="error">CORS Errors</Typography>
-                    <Typography variant="body2">
-                      Check CORS_ALLOW_ALL_ORIGINS setting and ensure frontend URL is allowed.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="error">JWT Token Issues</Typography>
-                    <Typography variant="body2">
-                      Verify JWT settings and ensure tokens are being sent in Authorization header.
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" color="error">Media Upload Issues</Typography>
-                    <Typography variant="body2">
-                      Configure Cloudinary settings properly for media storage functionality.
-                    </Typography>
-                  </CardContent>
-                </Card>
+                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="error">Database Connection Issues</Typography><Typography variant="body2">Ensure PostgreSQL is running and credentials in settings.py are correct.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="error">CORS Errors</Typography><Typography variant="body2">Check CORS_ALLOW_ALL_ORIGINS setting and ensure frontend URL is allowed.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="error">JWT Token Issues</Typography><Typography variant="body2">Verify JWT settings and ensure tokens are being sent in Authorization header.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="error">Media Upload Issues</Typography><Typography variant="body2">Configure Cloudinary settings properly for media storage functionality.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="error">Game API Issues</Typography><Typography variant="body2">Ensure you are authenticated and passing the correct group ID for all game endpoints.</Typography></CardContent></Card>
               </AccordionDetails>
             </Accordion>
-
             {/* Future Enhancements */}
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -4743,10 +4415,8 @@ POST /api/reactions/post/1/
                 </List>
               </AccordionDetails>
             </Accordion>
-
           </Box>
         </DialogContent>
-        
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={handleClose} variant="contained" sx={{ 
             background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
@@ -4807,6 +4477,42 @@ function AppContent() {
           </Routes>
         </Container>
         {/* Fixed Footer */}
+        <Box
+          component="footer"
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+            color: 'white',
+            py: 1,
+            px: 2,
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+            borderTop: '1px solid rgba(255,255,255,0.1)'
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 1
+            }}>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Bonded Social Platform
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                © 2025 Aniruddha H D. All rights reserved.
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.7 }}>
+                Version 1.1.0
+              </Typography>
+            </Box>
+          </Container>
+        </Box>
       </Router>
     </GroupProvider>
   );
