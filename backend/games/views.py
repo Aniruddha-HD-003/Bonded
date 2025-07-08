@@ -497,12 +497,12 @@ def word_association_game(request):
     
     try:
         # Get words from group posts
-        posts = Post.objects.filter(group_id=group_id, content__isnull=False).exclude(content='')
+        posts = Post.objects.filter(group_id=group_id, text__isnull=False).exclude(text='')
         words = []
         
         for post in posts:
-            # Extract words from post content
-            post_words = re.findall(r'\b[a-zA-Z]{3,}\b', post.content.lower())
+            # Extract words from post text
+            post_words = re.findall(r'\b[a-zA-Z]{3,}\b', post.text.lower())
             words.extend(post_words)
         
         # Get most common words (excluding common stop words)

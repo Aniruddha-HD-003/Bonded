@@ -38,8 +38,6 @@ import {
   LinearProgress,
   MenuItem,
   Checkbox,
-  IconButton,
-  DialogContentText
 } from '@mui/material';
 import { 
   Group as GroupIcon,
@@ -55,17 +53,12 @@ import {
   Security as SecurityIcon,
   Api as ApiIcon,
   Build as BuildIcon,
-  Image as ImageIcon,
-  VideoLibrary as VideoIcon,
   AttachFile as AttachFileIcon,
   Delete as DeleteIcon,
   EmojiEvents as EmojiEventsIcon,
   TrendingUp as TrendingUpIcon,
   Leaderboard as LeaderboardIcon,
   Star as StarIcon,
-  Timer as TimerIcon,
-  CheckCircle as CheckCircleIcon,
-  PlayArrow as PlayArrowIcon,
   Add as AddIcon,
   Poll as PollIcon,
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
@@ -97,14 +90,26 @@ function GroupProvider({ children }: { children: React.ReactNode }) {
     const m = localStorage.getItem('memberships');
     return m ? JSON.parse(m) : [];
   });
+  // Auto-select group if only one membership exists
   const [selectedGroup, setSelectedGroup] = useState<Membership | null>(() => {
     const sg = localStorage.getItem('selectedGroup');
-    return sg ? JSON.parse(sg) : null;
+    if (sg) return JSON.parse(sg);
+    const m = localStorage.getItem('memberships');
+    if (m) {
+      const memberships = JSON.parse(m);
+      if (memberships.length === 1) return memberships[0];
+    }
+    return null;
   });
 
   useEffect(() => {
     if (memberships.length > 0) {
       localStorage.setItem('memberships', JSON.stringify(memberships));
+      // If only one group, auto-select it
+      if (memberships.length === 1) {
+        setSelectedGroup(memberships[0]);
+        localStorage.setItem('selectedGroup', JSON.stringify(memberships[0]));
+      }
     }
   }, [memberships]);
 
@@ -145,54 +150,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
 function useAuth() {
   return useContext(AuthContext);
-}
-
-function GroupSelector() {
-  const { memberships, selectedGroup, setSelectedGroup } = useGroup();
-  if (!memberships || memberships.length === 0) return null;
-  return (
-    <Card sx={{ 
-      mb: 3, 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      color: 'white',
-      borderRadius: 3,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-    }}>
-      <CardContent>
-        <Box display="flex" alignItems="center" mb={2}>
-          <GroupIcon sx={{ mr: 1, fontSize: 28 }} />
-          <Typography variant="h6" fontWeight="bold">Select Your Group</Typography>
-        </Box>
-        <TextField
-          select
-          SelectProps={{ native: true }}
-          value={selectedGroup?.group_id || ''}
-          onChange={e => {
-            const group = memberships.find((m: Membership) => m.group_id === Number(e.target.value));
-            setSelectedGroup(group || null);
-          }}
-          fullWidth
-          sx={{ 
-            '& .MuiOutlinedInput-root': {
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              color: 'white',
-              '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-              '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
-              '&.Mui-focused fieldset': { borderColor: 'white' }
-            },
-            '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
-            '& .MuiSelect-select': { color: 'white' },
-            '& option': { backgroundColor: '#667eea', color: 'white' }
-          }}
-        >
-          <option value="" disabled>Select a group</option>
-          {memberships.map((m: Membership) => (
-            <option key={m.group_id} value={m.group_id}>{m.group_name} ({m.username})</option>
-          ))}
-        </TextField>
-      </CardContent>
-    </Card>
-  );
 }
 
 function HomePage() {
@@ -4834,12 +4791,10 @@ function AppContent() {
             {isAuthenticated && <LogoutButton />}
           </Toolbar>
         </AppBar>
-        
         {/* Spacer to prevent content from being hidden behind fixed header */}
         <Toolbar />
-        
         <Container sx={{ mt: 4, mb: 8, minHeight: 'calc(100vh - 140px)' }}>
-          <GroupSelector />
+          {/* Removed <GroupSelector /> */}
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/onboarding" element={<Onboarding />} />
@@ -4851,46 +4806,9 @@ function AppContent() {
             <Route path="/games" element={<Games />} />
           </Routes>
         </Container>
-        
         {/* Fixed Footer */}
-        <Box
-          component="footer"
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
-            color: 'white',
-            py: 1,
-            px: 2,
-            zIndex: (theme) => theme.zIndex.drawer + 1,
-            boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
-            borderTop: '1px solid rgba(255,255,255,0.1)'
-          }}
-        >
-          <Container maxWidth="lg">
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: 1
-            }}>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Bonded Social Platform
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                © 2025 Aniruddha H D. All rights reserved.
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                Version 1.0.0
-              </Typography>
-            </Box>
-          </Container>
-        </Box>
       </Router>
-      </GroupProvider>
+    </GroupProvider>
   );
 }
 
