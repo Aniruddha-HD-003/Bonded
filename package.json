@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@mui/icons-material": "^5.15.14",
+    "@mui/material": "^5.15.14",
+    "@mui/system": "^5.15.14",
+    "@mui/x-date-pickers": "^7.9.0",
+    "@mui/x-date-pickers-pro": "^7.9.0",
+    "date-fns": "^3.6.0",
+    "dayjs": "^1.11.13"
+  }
+}
