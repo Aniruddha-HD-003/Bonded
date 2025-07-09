@@ -6,7 +6,15 @@ from .views import (
     TwoTruthsAndLieDetailView, guess_two_truths_lie, WouldYouRatherListCreateView, 
     WouldYouRatherDetailView, vote_would_you_rather, ThisOrThatListCreateView, 
     ThisOrThatDetailView, vote_this_or_that, FillInTheBlankListCreateView, 
-    FillInTheBlankDetailView, submit_fill_in_blank, fill_in_blank_responses
+    FillInTheBlankDetailView, submit_fill_in_blank, fill_in_blank_responses,
+    SpotTheDifferenceListCreateView, SpotTheDifferenceDetailView, submit_spot_difference_attempt,
+    GuessWhoListCreateView, GuessWhoDetailView, submit_guess_who_attempt,
+    generate_word_cloud, ReactionRaceListCreateView, ReactionRaceDetailView,
+    join_reaction_race, reaction_race_leaderboard,
+    BirthdayCelebrationListCreateView, BirthdayCelebrationDetailView, send_birthday_wish, birthday_wishes,
+    AnniversaryCelebrationListCreateView, AnniversaryCelebrationDetailView, send_anniversary_message, anniversary_messages,
+    HolidayGameListCreateView, HolidayGameDetailView, join_holiday_game, holiday_game_participants,
+    RandomActOfKindnessListCreateView, RandomActOfKindnessDetailView, complete_kindness_act, kindness_act_completions
 )
 
 urlpatterns = [
@@ -65,4 +73,49 @@ urlpatterns = [
     path('fill-in-blank/<int:pk>/', FillInTheBlankDetailView.as_view(), name='fill-in-blank-detail'),
     path('fill-in-blank/<int:game_id>/submit/', submit_fill_in_blank, name='fill-in-blank-submit'),
     path('fill-in-blank/<int:game_id>/responses/', fill_in_blank_responses, name='fill-in-blank-responses'),
+    
+    # Engagement Games endpoints
+    # Spot the Difference
+    path('spot-difference/', SpotTheDifferenceListCreateView.as_view(), name='spot-difference-list-create'),
+    path('spot-difference/<int:pk>/', SpotTheDifferenceDetailView.as_view(), name='spot-difference-detail'),
+    path('spot-difference/<int:game_id>/attempt/', submit_spot_difference_attempt, name='spot-difference-attempt'),
+    
+    # Guess Who
+    path('guess-who/', GuessWhoListCreateView.as_view(), name='guess-who-list-create'),
+    path('guess-who/<int:pk>/', GuessWhoDetailView.as_view(), name='guess-who-detail'),
+    path('guess-who/<int:game_id>/attempt/', submit_guess_who_attempt, name='guess-who-attempt'),
+    
+    # Word Cloud
+    path('word-cloud/<int:group_id>/', generate_word_cloud, name='generate-word-cloud'),
+    
+    # Reaction Race
+    path('reaction-race/', ReactionRaceListCreateView.as_view(), name='reaction-race-list-create'),
+    path('reaction-race/<int:pk>/', ReactionRaceDetailView.as_view(), name='reaction-race-detail'),
+    path('reaction-race/<int:race_id>/join/', join_reaction_race, name='join-reaction-race'),
+    path('reaction-race/<int:race_id>/leaderboard/', reaction_race_leaderboard, name='reaction-race-leaderboard'),
+    
+    # Seasonal & Special Events endpoints
+    # Birthday Celebrations
+    path('birthday-celebrations/', BirthdayCelebrationListCreateView.as_view(), name='birthday-celebration-list-create'),
+    path('birthday-celebrations/<int:pk>/', BirthdayCelebrationDetailView.as_view(), name='birthday-celebration-detail'),
+    path('birthday-celebrations/<int:celebration_id>/wish/', send_birthday_wish, name='send-birthday-wish'),
+    path('birthday-celebrations/<int:celebration_id>/wishes/', birthday_wishes, name='birthday-wishes'),
+    
+    # Anniversary Celebrations
+    path('anniversary-celebrations/', AnniversaryCelebrationListCreateView.as_view(), name='anniversary-celebration-list-create'),
+    path('anniversary-celebrations/<int:pk>/', AnniversaryCelebrationDetailView.as_view(), name='anniversary-celebration-detail'),
+    path('anniversary-celebrations/<int:celebration_id>/message/', send_anniversary_message, name='send-anniversary-message'),
+    path('anniversary-celebrations/<int:celebration_id>/messages/', anniversary_messages, name='anniversary-messages'),
+    
+    # Holiday Games
+    path('holiday-games/', HolidayGameListCreateView.as_view(), name='holiday-game-list-create'),
+    path('holiday-games/<int:pk>/', HolidayGameDetailView.as_view(), name='holiday-game-detail'),
+    path('holiday-games/<int:game_id>/join/', join_holiday_game, name='join-holiday-game'),
+    path('holiday-games/<int:game_id>/participants/', holiday_game_participants, name='holiday-game-participants'),
+    
+    # Random Acts of Kindness
+    path('random-acts-kindness/', RandomActOfKindnessListCreateView.as_view(), name='random-act-kindness-list-create'),
+    path('random-acts-kindness/<int:pk>/', RandomActOfKindnessDetailView.as_view(), name='random-act-kindness-detail'),
+    path('random-acts-kindness/<int:kindness_act_id>/complete/', complete_kindness_act, name='complete-kindness-act'),
+    path('random-acts-kindness/<int:kindness_act_id>/completions/', kindness_act_completions, name='kindness-act-completions'),
 ] 

@@ -74,7 +74,7 @@ Create a `.env.production` file in the `frontend/` directory:
 ```bash
 REACT_APP_API_URL=https://your-backend-domain.com/api
 REACT_APP_ENVIRONMENT=production
-REACT_APP_VERSION=1.2.0
+REACT_APP_VERSION=1.4.0
 ```
 
 ### 2. Install Dependencies
@@ -377,6 +377,6 @@ Your Bonded social platform is now ready for production!
 
 ---
 
-**Version:** 1.2.0  
+**Version:** 1.4.0  
 **Last Updated:** June 2025  
 **Maintainer:** Bonded Development Team 

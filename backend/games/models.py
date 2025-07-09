@@ -327,4 +327,251 @@ class FillInTheBlankResponse(models.Model):
         unique_together = ('game', 'user')
     
     def __str__(self):
-        return f"{self.user.username}: {self.filled_text}"
+        return f"{self.user.username} - {self.filled_text}"
+
+# Engagement Games Models
+class SpotTheDifference(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='spot_difference_games')
+    original_image = models.URLField(help_text="Original image URL")
+    modified_image = models.URLField(help_text="Modified image URL with differences")
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    difficulty = models.CharField(max_length=20, choices=[
+        ('easy', 'Easy'),
+        ('medium', 'Medium'),
+        ('hard', 'Hard'),
+    ], default='medium')
+    differences_count = models.IntegerField(default=5)
+    time_limit = models.IntegerField(default=60, help_text="Time limit in seconds")
+    points_reward = models.IntegerField(default=10)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_spot_difference')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Spot the Difference: {self.title} ({self.group.name})"
+
+class SpotTheDifferenceAttempt(models.Model):
+    game = models.ForeignKey(SpotTheDifference, on_delete=models.CASCADE, related_name='attempts')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spot_difference_attempts')
+    differences_found = models.IntegerField(default=0)
+    time_taken = models.IntegerField(help_text="Time taken in seconds")
+    is_completed = models.BooleanField(default=False)
+    score = models.IntegerField(default=0)
+    attempted_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('game', 'user')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.game.title} ({self.differences_found}/{self.game.differences_count})"
+
+class GuessWho(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='guess_who_games')
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    photo_url = models.URLField(help_text="Childhood or mystery photo URL")
+    correct_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='guess_who_photos')
+    hint = models.CharField(max_length=300, blank=True)
+    points_reward = models.IntegerField(default=15)
+    time_limit = models.IntegerField(default=300, help_text="Time limit in seconds")
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_guess_who')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Guess Who: {self.title} ({self.group.name})"
+
+class GuessWhoAttempt(models.Model):
+    game = models.ForeignKey(GuessWho, on_delete=models.CASCADE, related_name='attempts')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='guess_who_attempts')
+    guessed_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='guess_who_guesses')
+    is_correct = models.BooleanField()
+    time_taken = models.IntegerField(help_text="Time taken in seconds")
+    attempted_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('game', 'user')
+    
+    def __str__(self):
+        return f"{self.user.username} guessed {self.guessed_user.username} ({'Correct' if self.is_correct else 'Incorrect'})"
+
+class WordCloud(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='word_clouds')
+    period = models.CharField(max_length=20, choices=[
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+    ])
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    word_data = models.JSONField(help_text="Dictionary of words and their frequencies")
+    total_words = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('group', 'period', 'start_date')
+    
+    def __str__(self):
+        return f"Word Cloud: {self.group.name} - {self.period} ({self.start_date.date()})"
+
+class ReactionRace(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='reaction_races')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reaction_races')
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    target_reaction_type = models.CharField(max_length=50, help_text="Type of reaction to race for")
+    time_limit = models.IntegerField(default=300, help_text="Time limit in seconds")
+    points_reward = models.IntegerField(default=5)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_reaction_races')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Reaction Race: {self.title} ({self.group.name})"
+
+class ReactionRaceParticipant(models.Model):
+    race = models.ForeignKey(ReactionRace, on_delete=models.CASCADE, related_name='participants')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reaction_race_participations')
+    reaction_time = models.IntegerField(help_text="Time taken to react in seconds")
+    position = models.IntegerField(help_text="Position in the race (1st, 2nd, etc.)")
+    points_earned = models.IntegerField(default=0)
+    participated_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('race', 'user')
+        ordering = ['position']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.race.title} (Position: {self.position})"
+
+# Seasonal & Special Events Models
+class BirthdayCelebration(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='birthday_celebrations')
+    birthday_person = models.ForeignKey(User, on_delete=models.CASCADE, related_name='birthday_celebrations')
+    birthday_date = models.DateField()
+    celebration_date = models.DateField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('group', 'birthday_person', 'celebration_date')
+    
+    def __str__(self):
+        return f"Birthday Celebration: {self.birthday_person.username} ({self.celebration_date})"
+
+class BirthdayWish(models.Model):
+    celebration = models.ForeignKey(BirthdayCelebration, on_delete=models.CASCADE, related_name='wishes')
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_birthday_wishes')
+    message = models.TextField()
+    is_anonymous = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('celebration', 'from_user')
+    
+    def __str__(self):
+        return f"Birthday Wish from {self.from_user.username} to {self.celebration.birthday_person.username}"
+
+class AnniversaryCelebration(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='anniversary_celebrations')
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    anniversary_date = models.DateField()
+    celebration_date = models.DateField()
+    anniversary_type = models.CharField(max_length=50, choices=[
+        ('group_creation', 'Group Creation'),
+        ('first_post', 'First Post'),
+        ('member_milestone', 'Member Milestone'),
+        ('custom', 'Custom Anniversary'),
+    ])
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Anniversary: {self.title} ({self.celebration_date})"
+
+class AnniversaryMessage(models.Model):
+    celebration = models.ForeignKey(AnniversaryCelebration, on_delete=models.CASCADE, related_name='messages')
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_anniversary_messages')
+    message = models.TextField()
+    is_anonymous = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Anniversary Message from {self.from_user.username}"
+
+class HolidayGame(models.Model):
+    HOLIDAY_TYPES = [
+        ('christmas', 'Christmas'),
+        ('halloween', 'Halloween'),
+        ('valentines', 'Valentine\'s Day'),
+        ('easter', 'Easter'),
+        ('thanksgiving', 'Thanksgiving'),
+        ('new_year', 'New Year'),
+        ('custom', 'Custom Holiday'),
+    ]
+    
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='holiday_games')
+    holiday_type = models.CharField(max_length=20, choices=HOLIDAY_TYPES)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    game_type = models.CharField(max_length=50, choices=[
+        ('gift_exchange', 'Gift Exchange'),
+        ('costume_contest', 'Costume Contest'),
+        ('scavenger_hunt', 'Scavenger Hunt'),
+        ('trivia', 'Holiday Trivia'),
+        ('photo_contest', 'Photo Contest'),
+        ('custom', 'Custom Game'),
+    ])
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    points_reward = models.IntegerField(default=20)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_holiday_games')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Holiday Game: {self.title} ({self.holiday_type})"
+
+class HolidayGameParticipant(models.Model):
+    game = models.ForeignKey(HolidayGame, on_delete=models.CASCADE, related_name='participants')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='holiday_game_participations')
+    participation_date = models.DateTimeField(auto_now_add=True)
+    points_earned = models.IntegerField(default=0)
+    is_winner = models.BooleanField(default=False)
+    
+    class Meta:
+        unique_together = ('game', 'user')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.game.title}"
+
+class RandomActOfKindness(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='random_acts_of_kindness')
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    target_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='targeted_kindness_acts', null=True, blank=True)
+    is_group_wide = models.BooleanField(default=False, help_text="If True, act applies to entire group")
+    points_reward = models.IntegerField(default=15)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_kindness_acts')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Random Act of Kindness: {self.title}"
+
+class KindnessAct(models.Model):
+    kindness_act = models.ForeignKey(RandomActOfKindness, on_delete=models.CASCADE, related_name='completed_acts')
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='completed_kindness_acts')
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_kindness_acts', null=True, blank=True)
+    description = models.TextField(help_text="Description of the kind act performed")
+    is_anonymous = models.BooleanField(default=False)
+    points_earned = models.IntegerField(default=0)
+    completed_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('kindness_act', 'from_user')
+    
+    def __str__(self):
+        return f"Kindness Act: {self.from_user.username} -> {self.to_user.username if self.to_user else 'Group'}"

@@ -6,16 +6,19 @@ from django.utils import timezone
 from django.db.models import Q, Count, Sum
 from datetime import timedelta
 
-from .models import Challenge, ChallengeProgress, Streak, Leaderboard, LeaderboardEntry, Poll, PollOption, PollVote, Achievement, UserAchievement, TwoTruthsAndLie, TwoTruthsAndLieGuess, WouldYouRather, WouldYouRatherVote, ThisOrThat, ThisOrThatVote, FillInTheBlank, FillInTheBlankResponse
+from .models import Challenge, ChallengeProgress, Streak, Leaderboard, LeaderboardEntry, Poll, PollOption, PollVote, Achievement, UserAchievement, TwoTruthsAndLie, TwoTruthsAndLieGuess, WouldYouRather, WouldYouRatherVote, ThisOrThat, ThisOrThatVote, FillInTheBlank, FillInTheBlankResponse, SpotTheDifference, SpotTheDifferenceAttempt, GuessWho, GuessWhoAttempt, WordCloud, ReactionRace, ReactionRaceParticipant, BirthdayCelebration, BirthdayWish, AnniversaryCelebration, AnniversaryMessage, HolidayGame, HolidayGameParticipant, RandomActOfKindness, KindnessAct
 from .serializers import (
     ChallengeSerializer, ChallengeProgressSerializer, StreakSerializer,
     LeaderboardSerializer, LeaderboardEntrySerializer, UserStatsSerializer,
     PollSerializer, PollOptionSerializer, PollVoteSerializer,
     AchievementSerializer, UserAchievementSerializer, TwoTruthsAndLieSerializer, TwoTruthsAndLieGuessSerializer,
     WouldYouRatherSerializer, WouldYouRatherVoteSerializer, ThisOrThatSerializer, ThisOrThatVoteSerializer,
-    FillInTheBlankSerializer, FillInTheBlankResponseSerializer
+    FillInTheBlankSerializer, FillInTheBlankResponseSerializer, SpotTheDifferenceSerializer, SpotTheDifferenceAttemptSerializer,
+    GuessWhoSerializer, GuessWhoAttemptSerializer, WordCloudSerializer, ReactionRaceSerializer, ReactionRaceParticipantSerializer,
+    BirthdayCelebrationSerializer, BirthdayWishSerializer, AnniversaryCelebrationSerializer, AnniversaryMessageSerializer,
+    HolidayGameSerializer, HolidayGameParticipantSerializer, RandomActOfKindnessSerializer, KindnessActSerializer
 )
-from users.models import Group, GroupMembership
+from users.models import Group, GroupMembership, User
 from posts.models import Post
 from events.models import Event
 from comments.models import Comment
@@ -743,5 +746,592 @@ def fill_in_blank_responses(request, game_id):
         
     except FillInTheBlank.DoesNotExist:
         return Response({'error': 'Game not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+# Engagement Games Views
+class SpotTheDifferenceListCreateView(generics.ListCreateAPIView):
+    serializer_class = SpotTheDifferenceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_id = self.request.query_params.get('group')
+        if group_id:
+            return SpotTheDifference.objects.filter(group_id=group_id, is_active=True).order_by('-created_at')
+        return SpotTheDifference.objects.none()
+
+    def perform_create(self, serializer):
+        group_id = self.request.data.get('group')
+        serializer.save(created_by=self.request.user, group_id=group_id)
+
+class SpotTheDifferenceDetailView(generics.RetrieveAPIView):
+    serializer_class = SpotTheDifferenceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = SpotTheDifference.objects.all()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def submit_spot_difference_attempt(request, game_id):
+    """Submit an attempt for Spot the Difference game"""
+    try:
+        game = SpotTheDifference.objects.get(id=game_id)
+        differences_found = request.data.get('differences_found', 0)
+        time_taken = request.data.get('time_taken', 0)
+        
+        if not isinstance(differences_found, int) or differences_found < 0:
+            return Response({'error': 'Valid differences_found count is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not isinstance(time_taken, int) or time_taken < 0:
+            return Response({'error': 'Valid time_taken is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if user already attempted
+        if game.attempts.filter(user=request.user).exists():
+            return Response({'error': 'You have already attempted this game'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Calculate score based on differences found and time taken
+        accuracy_bonus = min(100, (differences_found / game.differences_count) * 100)
+        time_bonus = max(0, 100 - (time_taken / game.time_limit) * 100)
+        score = int((accuracy_bonus + time_bonus) / 2)
+        
+        is_completed = differences_found >= game.differences_count
+        
+        # Create attempt
+        attempt = SpotTheDifferenceAttempt.objects.create(
+            game=game,
+            user=request.user,
+            differences_found=differences_found,
+            time_taken=time_taken,
+            is_completed=is_completed,
+            score=score
+        )
+        
+        serializer = SpotTheDifferenceAttemptSerializer(attempt)
+        return Response({
+            'attempt': serializer.data,
+            'score': score,
+            'is_completed': is_completed,
+            'points_earned': game.points_reward if is_completed else 0
+        })
+        
+    except SpotTheDifference.DoesNotExist:
+        return Response({'error': 'Game not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class GuessWhoListCreateView(generics.ListCreateAPIView):
+    serializer_class = GuessWhoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_id = self.request.query_params.get('group')
+        if group_id:
+            return GuessWho.objects.filter(group_id=group_id, is_active=True).order_by('-created_at')
+        return GuessWho.objects.none()
+
+    def perform_create(self, serializer):
+        group_id = self.request.data.get('group')
+        serializer.save(created_by=self.request.user, group_id=group_id)
+
+class GuessWhoDetailView(generics.RetrieveAPIView):
+    serializer_class = GuessWhoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = GuessWho.objects.all()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def submit_guess_who_attempt(request, game_id):
+    """Submit a guess for Guess Who game"""
+    try:
+        game = GuessWho.objects.get(id=game_id)
+        guessed_user_id = request.data.get('guessed_user_id')
+        time_taken = request.data.get('time_taken', 0)
+        
+        if not guessed_user_id:
+            return Response({'error': 'guessed_user_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not isinstance(time_taken, int) or time_taken < 0:
+            return Response({'error': 'Valid time_taken is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if user already attempted
+        if game.attempts.filter(user=request.user).exists():
+            return Response({'error': 'You have already attempted this game'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if guessed user exists and is in the same group
+        try:
+            guessed_user = User.objects.get(id=guessed_user_id)
+            if not GroupMembership.objects.filter(user=guessed_user, group=game.group).exists():
+                return Response({'error': 'Guessed user is not in this group'}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({'error': 'Guessed user not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Check if guess is correct
+        is_correct = guessed_user == game.correct_user
+        
+        # Create attempt
+        attempt = GuessWhoAttempt.objects.create(
+            game=game,
+            user=request.user,
+            guessed_user=guessed_user,
+            is_correct=is_correct,
+            time_taken=time_taken
+        )
+        
+        serializer = GuessWhoAttemptSerializer(attempt)
+        return Response({
+            'attempt': serializer.data,
+            'is_correct': is_correct,
+            'correct_user_id': game.correct_user.id,
+            'points_earned': game.points_reward if is_correct else 0
+        })
+        
+    except GuessWho.DoesNotExist:
+        return Response({'error': 'Game not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def generate_word_cloud(request, group_id):
+    """Generate word cloud data for a group"""
+    try:
+        period = request.query_params.get('period', 'weekly')
+        if period not in ['daily', 'weekly', 'monthly']:
+            return Response({'error': 'Invalid period'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Calculate date range
+        now = timezone.now()
+        if period == 'daily':
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = start_date + timedelta(days=1)
+        elif period == 'weekly':
+            start_date = now - timedelta(days=7)
+            end_date = now
+        else:  # monthly
+            start_date = now - timedelta(days=30)
+            end_date = now
+        
+        # Get all posts from the group in the date range
+        posts = Post.objects.filter(
+            group_id=group_id,
+            created_at__gte=start_date,
+            created_at__lt=end_date
+        )
+        
+        # Extract words from post content
+        words = []
+        for post in posts:
+            if post.text:
+                # Clean and split text into words
+                text = re.sub(r'[^\w\s]', '', post.text.lower())
+                words.extend(text.split())
+        
+        # Count word frequencies
+        word_counts = Counter(words)
+        
+        # Remove common words and short words
+        common_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'mine', 'yours', 'hers', 'ours', 'theirs'}
+        
+        filtered_words = {word: count for word, count in word_counts.items() 
+                         if word not in common_words and len(word) > 2 and count > 1}
+        
+        # Sort by frequency and get top 50 words
+        sorted_words = sorted(filtered_words.items(), key=lambda x: x[1], reverse=True)[:50]
+        
+        # Create word cloud data
+        word_data = {word: count for word, count in sorted_words}
+        total_words = sum(word_data.values())
+        
+        # Check if word cloud already exists for this period
+        word_cloud, created = WordCloud.objects.get_or_create(
+            group_id=group_id,
+            period=period,
+            start_date=start_date,
+            defaults={
+                'end_date': end_date,
+                'word_data': word_data,
+                'total_words': total_words
+            }
+        )
+        
+        if not created:
+            word_cloud.word_data = word_data
+            word_cloud.total_words = total_words
+            word_cloud.save()
+        
+        serializer = WordCloudSerializer(word_cloud)
+        return Response(serializer.data)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class ReactionRaceListCreateView(generics.ListCreateAPIView):
+    serializer_class = ReactionRaceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_id = self.request.query_params.get('group')
+        if group_id:
+            return ReactionRace.objects.filter(group_id=group_id, is_active=True).order_by('-created_at')
+        return ReactionRace.objects.none()
+
+    def perform_create(self, serializer):
+        group_id = self.request.data.get('group')
+        post_id = self.request.data.get('post')
+        serializer.save(created_by=self.request.user, group_id=group_id, post_id=post_id)
+
+class ReactionRaceDetailView(generics.RetrieveAPIView):
+    serializer_class = ReactionRaceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = ReactionRace.objects.all()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def join_reaction_race(request, race_id):
+    """Join a reaction race"""
+    try:
+        race = ReactionRace.objects.get(id=race_id)
+        reaction_time = request.data.get('reaction_time', 0)
+        
+        if not isinstance(reaction_time, int) or reaction_time < 0:
+            return Response({'error': 'Valid reaction_time is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if user already participated
+        if race.participants.filter(user=request.user).exists():
+            return Response({'error': 'You have already participated in this race'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Calculate position based on reaction time
+        participants = race.participants.all()
+        position = participants.count() + 1
+        
+        # Calculate points based on position (1st gets full points, others get reduced)
+        if position == 1:
+            points_earned = race.points_reward
+        else:
+            points_earned = max(1, race.points_reward - (position - 1) * 2)
+        
+        # Create participation
+        participation = ReactionRaceParticipant.objects.create(
+            race=race,
+            user=request.user,
+            reaction_time=reaction_time,
+            position=position,
+            points_earned=points_earned
+        )
+        
+        serializer = ReactionRaceParticipantSerializer(participation)
+        return Response({
+            'participation': serializer.data,
+            'position': position,
+            'points_earned': points_earned
+        })
+        
+    except ReactionRace.DoesNotExist:
+        return Response({'error': 'Race not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def reaction_race_leaderboard(request, race_id):
+    """Get leaderboard for a reaction race"""
+    try:
+        race = ReactionRace.objects.get(id=race_id)
+        participants = race.participants.all().order_by('position')
+        serializer = ReactionRaceParticipantSerializer(participants, many=True)
+        return Response(serializer.data)
+        
+    except ReactionRace.DoesNotExist:
+        return Response({'error': 'Race not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+# Seasonal & Special Events Views
+class BirthdayCelebrationListCreateView(generics.ListCreateAPIView):
+    serializer_class = BirthdayCelebrationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_id = self.request.query_params.get('group')
+        if group_id:
+            return BirthdayCelebration.objects.filter(group_id=group_id, is_active=True).order_by('-celebration_date')
+        return BirthdayCelebration.objects.none()
+
+    def perform_create(self, serializer):
+        group_id = self.request.data.get('group')
+        birthday_person_id = self.request.data.get('birthday_person')
+        serializer.save(group_id=group_id, birthday_person_id=birthday_person_id)
+
+class BirthdayCelebrationDetailView(generics.RetrieveAPIView):
+    serializer_class = BirthdayCelebrationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = BirthdayCelebration.objects.all()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def send_birthday_wish(request, celebration_id):
+    """Send a birthday wish"""
+    try:
+        celebration = BirthdayCelebration.objects.get(id=celebration_id)
+        message = request.data.get('message')
+        is_anonymous = request.data.get('is_anonymous', False)
+        
+        if not message:
+            return Response({'error': 'Message is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if user already sent a wish
+        if celebration.wishes.filter(from_user=request.user).exists():
+            return Response({'error': 'You have already sent a wish for this celebration'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create wish
+        wish = BirthdayWish.objects.create(
+            celebration=celebration,
+            from_user=request.user,
+            message=message,
+            is_anonymous=is_anonymous
+        )
+        
+        serializer = BirthdayWishSerializer(wish)
+        return Response({
+            'wish': serializer.data,
+            'message': 'Birthday wish sent successfully!'
+        })
+        
+    except BirthdayCelebration.DoesNotExist:
+        return Response({'error': 'Celebration not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def birthday_wishes(request, celebration_id):
+    """Get all wishes for a birthday celebration"""
+    try:
+        celebration = BirthdayCelebration.objects.get(id=celebration_id)
+        wishes = celebration.wishes.all().order_by('created_at')
+        serializer = BirthdayWishSerializer(wishes, many=True)
+        return Response(serializer.data)
+        
+    except BirthdayCelebration.DoesNotExist:
+        return Response({'error': 'Celebration not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class AnniversaryCelebrationListCreateView(generics.ListCreateAPIView):
+    serializer_class = AnniversaryCelebrationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_id = self.request.query_params.get('group')
+        if group_id:
+            return AnniversaryCelebration.objects.filter(group_id=group_id, is_active=True).order_by('-celebration_date')
+        return AnniversaryCelebration.objects.none()
+
+    def perform_create(self, serializer):
+        group_id = self.request.data.get('group')
+        serializer.save(group_id=group_id)
+
+class AnniversaryCelebrationDetailView(generics.RetrieveAPIView):
+    serializer_class = AnniversaryCelebrationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = AnniversaryCelebration.objects.all()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def send_anniversary_message(request, celebration_id):
+    """Send an anniversary message"""
+    try:
+        celebration = AnniversaryCelebration.objects.get(id=celebration_id)
+        message = request.data.get('message')
+        is_anonymous = request.data.get('is_anonymous', False)
+        
+        if not message:
+            return Response({'error': 'Message is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if user already sent a message
+        if celebration.messages.filter(from_user=request.user).exists():
+            return Response({'error': 'You have already sent a message for this celebration'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create message
+        anniversary_message = AnniversaryMessage.objects.create(
+            celebration=celebration,
+            from_user=request.user,
+            message=message,
+            is_anonymous=is_anonymous
+        )
+        
+        serializer = AnniversaryMessageSerializer(anniversary_message)
+        return Response({
+            'message': serializer.data,
+            'message': 'Anniversary message sent successfully!'
+        })
+        
+    except AnniversaryCelebration.DoesNotExist:
+        return Response({'error': 'Celebration not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def anniversary_messages(request, celebration_id):
+    """Get all messages for an anniversary celebration"""
+    try:
+        celebration = AnniversaryCelebration.objects.get(id=celebration_id)
+        messages = celebration.messages.all().order_by('created_at')
+        serializer = AnniversaryMessageSerializer(messages, many=True)
+        return Response(serializer.data)
+        
+    except AnniversaryCelebration.DoesNotExist:
+        return Response({'error': 'Celebration not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class HolidayGameListCreateView(generics.ListCreateAPIView):
+    serializer_class = HolidayGameSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_id = self.request.query_params.get('group')
+        if group_id:
+            return HolidayGame.objects.filter(group_id=group_id, is_active=True).order_by('-created_at')
+        return HolidayGame.objects.none()
+
+    def perform_create(self, serializer):
+        group_id = self.request.data.get('group')
+        serializer.save(created_by=self.request.user, group_id=group_id)
+
+class HolidayGameDetailView(generics.RetrieveAPIView):
+    serializer_class = HolidayGameSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = HolidayGame.objects.all()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def join_holiday_game(request, game_id):
+    """Join a holiday game"""
+    try:
+        game = HolidayGame.objects.get(id=game_id)
+        
+        # Check if user already participated
+        if game.participants.filter(user=request.user).exists():
+            return Response({'error': 'You have already participated in this game'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if game is still active
+        now = timezone.now()
+        if now < game.start_date or now > game.end_date:
+            return Response({'error': 'Game is not currently active'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create participation
+        participation = HolidayGameParticipant.objects.create(
+            game=game,
+            user=request.user,
+            points_earned=game.points_reward
+        )
+        
+        serializer = HolidayGameParticipantSerializer(participation)
+        return Response({
+            'participation': serializer.data,
+            'message': 'Successfully joined the holiday game!'
+        })
+        
+    except HolidayGame.DoesNotExist:
+        return Response({'error': 'Game not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def holiday_game_participants(request, game_id):
+    """Get all participants for a holiday game"""
+    try:
+        game = HolidayGame.objects.get(id=game_id)
+        participants = game.participants.all().order_by('-participation_date')
+        serializer = HolidayGameParticipantSerializer(participants, many=True)
+        return Response(serializer.data)
+        
+    except HolidayGame.DoesNotExist:
+        return Response({'error': 'Game not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class RandomActOfKindnessListCreateView(generics.ListCreateAPIView):
+    serializer_class = RandomActOfKindnessSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_id = self.request.query_params.get('group')
+        if group_id:
+            return RandomActOfKindness.objects.filter(group_id=group_id, is_active=True).order_by('-created_at')
+        return RandomActOfKindness.objects.none()
+
+    def perform_create(self, serializer):
+        group_id = self.request.data.get('group')
+        target_user_id = self.request.data.get('target_user')
+        serializer.save(created_by=self.request.user, group_id=group_id, target_user_id=target_user_id)
+
+class RandomActOfKindnessDetailView(generics.RetrieveAPIView):
+    serializer_class = RandomActOfKindnessSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = RandomActOfKindness.objects.all()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def complete_kindness_act(request, kindness_act_id):
+    """Complete a random act of kindness"""
+    try:
+        kindness_act = RandomActOfKindness.objects.get(id=kindness_act_id)
+        description = request.data.get('description')
+        is_anonymous = request.data.get('is_anonymous', False)
+        to_user_id = request.data.get('to_user')
+        
+        if not description:
+            return Response({'error': 'Description is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if user already completed this act
+        if kindness_act.completed_acts.filter(from_user=request.user).exists():
+            return Response({'error': 'You have already completed this act of kindness'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate target user if specified
+        to_user = None
+        if to_user_id:
+            try:
+                to_user = User.objects.get(id=to_user_id)
+                if not GroupMembership.objects.filter(user=to_user, group=kindness_act.group).exists():
+                    return Response({'error': 'Target user is not in this group'}, status=status.HTTP_400_BAD_REQUEST)
+            except User.DoesNotExist:
+                return Response({'error': 'Target user not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Create completion
+        completion = KindnessAct.objects.create(
+            kindness_act=kindness_act,
+            from_user=request.user,
+            to_user=to_user,
+            description=description,
+            is_anonymous=is_anonymous,
+            points_earned=kindness_act.points_reward
+        )
+        
+        serializer = KindnessActSerializer(completion)
+        return Response({
+            'completion': serializer.data,
+            'message': 'Kindness act completed successfully!'
+        })
+        
+    except RandomActOfKindness.DoesNotExist:
+        return Response({'error': 'Kindness act not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def kindness_act_completions(request, kindness_act_id):
+    """Get all completions for a random act of kindness"""
+    try:
+        kindness_act = RandomActOfKindness.objects.get(id=kindness_act_id)
+        completions = kindness_act.completed_acts.all().order_by('completed_at')
+        serializer = KindnessActSerializer(completions, many=True)
+        return Response(serializer.data)
+        
+    except RandomActOfKindness.DoesNotExist:
+        return Response({'error': 'Kindness act not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
