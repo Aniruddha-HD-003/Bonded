@@ -2014,9 +2014,6 @@ function Games() {
   });
 
   // New: State placeholders for special events
-  const [anniversaryCelebrations, setAnniversaryCelebrations] = useState<any[]>([]);
-  const [holidayGames, setHolidayGames] = useState<any[]>([]);
-  const [randomActs, setRandomActs] = useState<any[]>([]);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
