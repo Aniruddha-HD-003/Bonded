@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { 
   CssBaseline, 
   Container, 
@@ -17,7 +17,6 @@ import {
   Card,
   CardContent,
   Chip,
-  Avatar,
   Fade,
   Dialog,
   DialogTitle,
@@ -41,13 +40,9 @@ import {
   useTheme,
   useMediaQuery
 } from '@mui/material';
+import { motion } from 'framer-motion';
 import { 
-  Group as GroupIcon,
-  Event as EventIcon,
-  PostAdd as PostAddIcon,
-  Comment as CommentIcon,
   Logout as LogoutIcon,
-  Dashboard as DashboardIcon,
   Help as HelpIcon,
   ExpandMore as ExpandMoreIcon,
   Code as CodeIcon,
@@ -55,12 +50,11 @@ import {
   Security as SecurityIcon,
   Api as ApiIcon,
   Build as BuildIcon,
-  AttachFile as AttachFileIcon,
   Delete as DeleteIcon,
   EmojiEvents as EmojiEventsIcon,
-  TrendingUp as TrendingUpIcon,
   Leaderboard as LeaderboardIcon,
   Star as StarIcon,
+  TrendingUp as TrendingUpIcon,
   Add as AddIcon,
   Poll as PollIcon,
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
@@ -86,6 +80,10 @@ import BirthdayCelebrations from './components/BirthdayCelebrations';
 import AnniversaryCelebrations from './components/AnniversaryCelebrations';
 import HolidayGames from './components/HolidayGames';
 import RandomActsOfKindness from './components/RandomActsOfKindness';
+import QuantumKitten from './components/QuantumKitten';
+import HomePage from './pages/HomePage';
+import Dashboard from './pages/Dashboard';
+
 
 // Group context to provide memberships and selected group
 type Membership = {
@@ -99,7 +97,7 @@ const GroupContext = createContext<any>(null);
 // Auth context to manage authentication state
 const AuthContext = createContext<any>(null);
 
-function GroupProvider({ children }: { children: React.ReactNode }) {
+export function GroupProvider({ children }: { children: React.ReactNode }) {
   const [memberships, setMemberships] = useState<Membership[]>(() => {
     const m = localStorage.getItem('memberships');
     return m ? JSON.parse(m) : [];
@@ -140,7 +138,7 @@ function GroupProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-function useGroup() {
+export function useGroup() {
   return useContext(GroupContext);
 }
 
@@ -166,204 +164,7 @@ function useAuth() {
   return useContext(AuthContext);
 }
 
-function HomePage() {
-  const navigate = useNavigate();
 
-  return (
-    <Box sx={{ 
-      minHeight: 'calc(100vh - 140px)',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      p: 3,
-      mt: 2
-    }}>
-      <Container maxWidth="md">
-        <Box sx={{ textAlign: 'center', color: 'white' }}>
-          {/* Hero Section */}
-          <Box sx={{ mb: 6 }}>
-            <BondedLogo size={120} src="/Bonded.png" />
-            <Typography variant="h2" fontWeight="bold" sx={{ mt: 3, mb: 2 }}>
-              Welcome to Bonded
-            </Typography>
-            <Typography variant="h5" sx={{ opacity: 0.9, mb: 4 }}>
-              Your private social space for friends and memories
-            </Typography>
-            <Typography variant="body1" sx={{ opacity: 0.8, maxWidth: 600, mx: 'auto' }}>
-              Create exclusive groups, share moments, plan events, and stay connected with your closest friends in a secure, private environment.
-            </Typography>
-          </Box>
-
-          {/* Action Cards */}
-          <Box sx={{ 
-            display: 'grid', 
-            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
-            gap: 4, 
-            maxWidth: 800, 
-            mx: 'auto' 
-          }}>
-            {/* Register Group Card */}
-            <Card sx={{ 
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: 4,
-              p: 4,
-              transition: 'all 0.3s ease',
-              cursor: 'pointer',
-              '&:hover': {
-                transform: 'translateY(-8px)',
-                background: 'rgba(255,255,255,0.15)',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
-              }
-            }} onClick={() => navigate('/onboarding')}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Box sx={{ 
-                  width: 80, 
-                  height: 80, 
-                  borderRadius: '50%', 
-                  background: 'linear-gradient(45deg, #4CAF50, #45a049)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 3,
-                  boxShadow: '0 8px 20px rgba(76, 175, 80, 0.3)'
-                }}>
-                  <GroupIcon sx={{ fontSize: 40, color: 'white' }} />
-                </Box>
-                <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
-                  Create New Group
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9, mb: 3 }}>
-                  Start a new private group for your friends, family, or team. Set up credentials and invite members.
-                </Typography>
-                <Button 
-                  variant="contained" 
-                  size="large"
-                  sx={{ 
-                    background: 'linear-gradient(45deg, #4CAF50 30%, #45a049 90%)',
-                    borderRadius: 3,
-                    px: 4,
-                    py: 1.5,
-                    fontSize: '1.1rem',
-                    fontWeight: 'bold',
-                    boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
-                    '&:hover': {
-                      background: 'linear-gradient(45deg, #45a049 30%, #4CAF50 90%)',
-                      boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
-                    }
-                  }}
-                >
-                  🚀 Get Started
-                </Button>
-              </Box>
-            </Card>
-
-            {/* Login Card */}
-            <Card sx={{ 
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: 4,
-              p: 4,
-              transition: 'all 0.3s ease',
-              cursor: 'pointer',
-              '&:hover': {
-                transform: 'translateY(-8px)',
-                background: 'rgba(255,255,255,0.15)',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
-              }
-            }} onClick={() => navigate('/login')}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Box sx={{ 
-                  width: 80, 
-                  height: 80, 
-                  borderRadius: '50%', 
-                  background: 'linear-gradient(45deg, #2196F3, #1976D2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 3,
-                  boxShadow: '0 8px 20px rgba(33, 150, 243, 0.3)'
-                }}>
-                  <DashboardIcon sx={{ fontSize: 40, color: 'white' }} />
-                </Box>
-                <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
-                  Sign In
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9, mb: 3 }}>
-                  Already have a group? Sign in with your credentials to access your social space.
-                </Typography>
-                <Button 
-                  variant="contained" 
-                  size="large"
-                  sx={{ 
-                    background: 'linear-gradient(45deg, #2196F3 30%, #1976D2 90%)',
-                    borderRadius: 3,
-                    px: 4,
-                    py: 1.5,
-                    fontSize: '1.1rem',
-                    fontWeight: 'bold',
-                    boxShadow: '0 4px 15px rgba(33, 150, 243, 0.3)',
-                    '&:hover': {
-                      background: 'linear-gradient(45deg, #1976D2 30%, #2196F3 90%)',
-                      boxShadow: '0 6px 20px rgba(33, 150, 243, 0.4)'
-                    }
-                  }}
-                >
-                  🔐 Sign In
-                </Button>
-              </Box>
-            </Card>
-          </Box>
-
-          {/* Features Section */}
-          <Box sx={{ mt: 8 }}>
-            <Typography variant="h4" fontWeight="bold" sx={{ mb: 4 }}>
-              Why Choose Bonded?
-            </Typography>
-            <Box sx={{ 
-              display: 'grid', 
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, 
-              gap: 3 
-            }}>
-              <Box sx={{ textAlign: 'center', p: 2 }}>
-                <SecurityIcon sx={{ fontSize: 40, mb: 2, opacity: 0.8 }} />
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
-                  Private & Secure
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                  Your group is completely private and secure with JWT authentication.
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: 'center', p: 2 }}>
-                <EventIcon sx={{ fontSize: 40, mb: 2, opacity: 0.8 }} />
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
-                  Plan Events
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                  Create and manage events, trips, and meetings with your group.
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: 'center', p: 2 }}>
-                <CommentIcon sx={{ fontSize: 40, mb: 2, opacity: 0.8 }} />
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
-                  Stay Connected
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                  Share posts, comments, and reactions with your group members.
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-      </Container>
-    </Box>
-  );
-}
 
 function Onboarding() {
   const [groupName, setGroupName] = useState('');
@@ -391,19 +192,20 @@ function Onboarding() {
   };
 
   return (
-    <Box mt={2}>
+    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
       <Card sx={{ 
         maxWidth: 600, 
-        mx: 'auto', 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
+        width: '100%',
+        background: 'rgba(26, 26, 58, 0.3)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(0, 255, 136, 0.2)',
         borderRadius: 4,
-        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+        boxShadow: '0 20px 40px rgba(0, 255, 136, 0.1)',
         overflow: 'hidden',
         position: 'relative'
       }}>
         <Box sx={{ 
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+          background: 'rgba(0, 255, 136, 0.1)',
           p: 4, 
           position: 'relative'
         }}>
@@ -417,9 +219,13 @@ function Onboarding() {
             <Button 
               onClick={() => navigate('/')}
               sx={{ 
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)',
-                '&:hover': { background: 'rgba(255,255,255,0.1)' }
+                color: '#00ff88',
+                border: '1px solid rgba(0, 255, 136, 0.3)',
+                fontFamily: 'Orbitron, monospace',
+                '&:hover': { 
+                  background: 'rgba(0, 255, 136, 0.1)',
+                  borderColor: '#00ff88'
+                }
               }}
             >
               ← Back to Home
@@ -432,11 +238,20 @@ function Onboarding() {
             ml: 8, // Add left margin to avoid overlap with back button
             mr: 2  // Add right margin for balance
           }}>
-            <Typography variant="h4" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>
-              🚀 Create Your Group
+            <Typography variant="h4" sx={{ 
+              fontFamily: 'Orbitron, monospace',
+              fontWeight: 700,
+              color: '#ffffff',
+              mb: 2
+            }}>
+              🚀 Create Your Quantum Group
             </Typography>
-            <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
-              Set up your private social space for friends and memories
+            <Typography variant="subtitle1" sx={{ 
+              opacity: 0.9,
+              color: '#c0c0c0',
+              fontFamily: 'Orbitron, monospace'
+            }}>
+              Set up your private quantum social space for friends and memories
             </Typography>
           </Box>
         </Box>
@@ -511,13 +326,13 @@ function Onboarding() {
                 sx={{ 
                   mb: 3,
                   '& .MuiOutlinedInput-root': {
-                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backgroundColor: 'rgba(0, 255, 136, 0.05)',
                     color: 'white',
-                    '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-                    '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
-                    '&.Mui-focused fieldset': { borderColor: 'white' }
+                    '& fieldset': { borderColor: 'rgba(0, 255, 136, 0.3)' },
+                    '&:hover fieldset': { borderColor: 'rgba(0, 255, 136, 0.5)' },
+                    '&.Mui-focused fieldset': { borderColor: '#00ff88' }
                   },
-                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(0, 255, 136, 0.8)' },
                   '& .MuiInputBase-input': { color: 'white' }
                 }}
               />
@@ -532,13 +347,13 @@ function Onboarding() {
                 sx={{ 
                   mb: 3,
                   '& .MuiOutlinedInput-root': {
-                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backgroundColor: 'rgba(0, 255, 136, 0.05)',
                     color: 'white',
-                    '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-                    '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
-                    '&.Mui-focused fieldset': { borderColor: 'white' }
+                    '& fieldset': { borderColor: 'rgba(0, 255, 136, 0.3)' },
+                    '&:hover fieldset': { borderColor: 'rgba(0, 255, 136, 0.5)' },
+                    '&.Mui-focused fieldset': { borderColor: '#00ff88' }
                   },
-                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
+                  '& .MuiInputLabel-root': { color: 'rgba(0, 255, 136, 0.8)' },
                   '& .MuiInputBase-input': { color: 'white' }
                 }}
               />
@@ -554,19 +369,24 @@ function Onboarding() {
                 size="large"
                 disabled={loading}
                 sx={{ 
-                  background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                  background: 'linear-gradient(45deg, #00ff88 0%, #00cc6a 100%)',
+                  color: '#0a0a1a',
                   borderRadius: 3,
                   py: 1.5,
                   fontSize: '1.1rem',
-                  fontWeight: 'bold',
-                  boxShadow: '0 4px 15px rgba(33, 150, 243, 0.3)',
+                  fontWeight: 600,
+                  fontFamily: 'Orbitron, monospace',
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                  boxShadow: '0 4px 15px rgba(0, 255, 136, 0.3)',
                   '&:hover': {
-                    background: 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)',
-                    boxShadow: '0 6px 20px rgba(33, 150, 243, 0.4)'
+                    background: 'linear-gradient(45deg, #00cc6a 0%, #00ff88 100%)',
+                    boxShadow: '0 6px 20px rgba(0, 255, 136, 0.4)',
+                    transform: 'translateY(-2px)'
                   }
                 }}
               >
-                {loading ? 'Creating Group...' : '🚀 Create Group'}
+                {loading ? 'Creating Quantum Group...' : '🚀 Create Quantum Group'}
               </Button>
             </form>
           )}
@@ -631,19 +451,20 @@ function Login() {
   };
 
   return (
-    <Box mt={2}>
+    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
       <Card sx={{ 
         maxWidth: 500, 
-        mx: 'auto', 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
+        width: '100%',
+        background: 'rgba(26, 26, 58, 0.3)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(0, 255, 136, 0.2)',
         borderRadius: 4,
-        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+        boxShadow: '0 20px 40px rgba(0, 255, 136, 0.1)',
         overflow: 'hidden',
         position: 'relative'
       }}>
         <Box sx={{ 
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+          background: 'rgba(0, 255, 136, 0.1)',
           p: 4, 
           position: 'relative'
         }}>
@@ -657,9 +478,13 @@ function Login() {
             <Button 
               onClick={() => navigate('/')}
               sx={{ 
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)',
-                '&:hover': { background: 'rgba(255,255,255,0.1)' }
+                color: '#00ff88',
+                border: '1px solid rgba(0, 255, 136, 0.3)',
+                fontFamily: 'Orbitron, monospace',
+                '&:hover': { 
+                  background: 'rgba(0, 255, 136, 0.1)',
+                  borderColor: '#00ff88'
+                }
               }}
             >
               ← Back to Home
@@ -672,11 +497,20 @@ function Login() {
             ml: 8, // Add left margin to avoid overlap with back button
             mr: 2  // Add right margin for balance
           }}>
-            <Typography variant="h4" gutterBottom fontWeight="bold">
-              🔐 Welcome Back
+            <Typography variant="h4" sx={{ 
+              fontFamily: 'Orbitron, monospace',
+              fontWeight: 700,
+              color: '#ffffff',
+              mb: 2
+            }}>
+              🔐 Quantum Login
             </Typography>
-            <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
-              Sign in to your group space
+            <Typography variant="subtitle1" sx={{ 
+              opacity: 0.9,
+              color: '#c0c0c0',
+              fontFamily: 'Orbitron, monospace'
+            }}>
+              Sign in to your quantum group space
             </Typography>
           </Box>
         </Box>
@@ -691,13 +525,13 @@ function Login() {
               sx={{ 
                 mb: 3,
                 '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  backgroundColor: 'rgba(0, 255, 136, 0.05)',
                   color: 'white',
-                  '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
-                  '&.Mui-focused fieldset': { borderColor: 'white' }
+                  '& fieldset': { borderColor: 'rgba(0, 255, 136, 0.3)' },
+                  '&:hover fieldset': { borderColor: 'rgba(0, 255, 136, 0.5)' },
+                  '&.Mui-focused fieldset': { borderColor: '#00ff88' }
                 },
-                '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
+                '& .MuiInputLabel-root': { color: 'rgba(0, 255, 136, 0.8)' },
                 '& .MuiInputBase-input': { color: 'white' }
               }}
             />
@@ -710,13 +544,13 @@ function Login() {
               sx={{ 
                 mb: 3,
                 '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  backgroundColor: 'rgba(0, 255, 136, 0.05)',
                   color: 'white',
-                  '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
-                  '&.Mui-focused fieldset': { borderColor: 'white' }
+                  '& fieldset': { borderColor: 'rgba(0, 255, 136, 0.3)' },
+                  '&:hover fieldset': { borderColor: 'rgba(0, 255, 136, 0.5)' },
+                  '&.Mui-focused fieldset': { borderColor: '#00ff88' }
                 },
-                '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
+                '& .MuiInputLabel-root': { color: 'rgba(0, 255, 136, 0.8)' },
                 '& .MuiInputBase-input': { color: 'white' }
               }}
             />
@@ -730,13 +564,13 @@ function Login() {
               sx={{ 
                 mb: 3,
                 '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  backgroundColor: 'rgba(0, 255, 136, 0.05)',
                   color: 'white',
-                  '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
-                  '&.Mui-focused fieldset': { borderColor: 'white' }
+                  '& fieldset': { borderColor: 'rgba(0, 255, 136, 0.3)' },
+                  '&:hover fieldset': { borderColor: 'rgba(0, 255, 136, 0.5)' },
+                  '&.Mui-focused fieldset': { borderColor: '#00ff88' }
                 },
-                '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
+                '& .MuiInputLabel-root': { color: 'rgba(0, 255, 136, 0.8)' },
                 '& .MuiInputBase-input': { color: 'white' }
               }}
             />
@@ -752,19 +586,24 @@ function Login() {
               size="large"
               disabled={loading}
               sx={{ 
-                background: 'linear-gradient(45deg, #4CAF50 30%, #45a049 90%)',
+                background: 'linear-gradient(45deg, #00ff88 0%, #00cc6a 100%)',
+                color: '#0a0a1a',
                 borderRadius: 3,
                 py: 1.5,
                 fontSize: '1.1rem',
-                fontWeight: 'bold',
-                boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
+                fontWeight: 600,
+                fontFamily: 'Orbitron, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: 1,
+                boxShadow: '0 4px 15px rgba(0, 255, 136, 0.3)',
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #45a049 30%, #4CAF50 90%)',
-                  boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
+                  background: 'linear-gradient(45deg, #00cc6a 0%, #00ff88 100%)',
+                  boxShadow: '0 6px 20px rgba(0, 255, 136, 0.4)',
+                  transform: 'translateY(-2px)'
                 }
               }}
             >
-              {loading ? 'Signing In...' : '🚀 Sign In'}
+              {loading ? 'Quantum Signing In...' : '🚀 Quantum Sign In'}
             </Button>
           </form>
         </CardContent>
@@ -826,1074 +665,134 @@ function CredentialChange() {
   }
 
   return (
-    <Box mt={2}>
-      <Paper sx={{ p: 4, maxWidth: 400, mx: 'auto' }}>
-        <Typography variant="h5" gutterBottom>Set Your Username & Password</Typography>
-        {success ? (
-          <Alert severity="success">Credentials updated! Redirecting to login...</Alert>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <TextField
-              label="New Username"
-              value={newUsername}
-              onChange={e => setNewUsername(e.target.value)}
-              fullWidth
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label="New Password"
-              type="password"
-              value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
-              fullWidth
-              required
-              sx={{ mb: 2 }}
-            />
-            {error && (
-              Array.isArray(error) ? error.map((msg, idx) => (
-                <Alert severity="error" sx={{ mb: 1 }} key={idx}>{msg}</Alert>
-              )) : <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
-            )}
-            <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
-              {loading ? 'Updating...' : 'Update Credentials'}
-            </Button>
-          </form>
-        )}
-      </Paper>
-    </Box>
-  );
-}
-
-function Comments({ postId }: { postId: number }) {
-  const [comments, setComments] = useState<any[]>([]);
-  const [newComment, setNewComment] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const fetchComments = useCallback(() => {
-    apiClient.get(`/comments/post/${postId}/`)
-      .then((res: any) => setComments(res.data))
-      .catch(() => setComments([]));
-  }, [postId]);
-
-  useEffect(() => {
-    fetchComments();
-  }, [fetchComments]);
-
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-    setLoading(true);
-    try {
-      await apiClient.post(`/comments/post/${postId}/`, {
-        text: newComment
-      });
-      setNewComment('');
-      fetchComments();
-    } catch (err) {
-      console.error('Failed to add comment:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Box sx={{ mt: 2 }}>
-      <Box component="form" onSubmit={handleCommentSubmit} sx={{ 
-        display: 'flex', 
-        gap: 1, 
-        mb: 2,
-        background: 'rgba(255,255,255,0.05)',
-        borderRadius: 2,
-        p: 1
-      }}>
-        <TextField
-          label="Add a comment..."
-          value={newComment}
-          onChange={e => setNewComment(e.target.value)}
-          fullWidth
-          size="small"
-          sx={{ 
-            '& .MuiOutlinedInput-root': {
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              color: 'white',
-              '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
-              '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.4)' },
-              '&.Mui-focused fieldset': { borderColor: 'rgba(255,255,255,0.6)' }
-            },
-            '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)' },
-            '& .MuiInputBase-input': { color: 'white' }
-          }}
-        />
-        <Button 
-          type="submit" 
-          variant="contained" 
-          size="small"
-          disabled={loading}
-          sx={{ 
-            background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: 2,
-            px: 2,
-            minWidth: 'fit-content',
-            boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)',
-            '&:hover': {
-              background: 'linear-gradient(45deg, #764ba2 0%, #667eea 100%)',
-              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)'
-            }
-          }}
-        >
-          <CommentIcon sx={{ fontSize: 16, mr: 0.5 }} />
-          Comment
-        </Button>
-      </Box>
-      <List sx={{ p: 0 }}>
-        {comments.map((c: any) => (
-          <Card key={c.id} sx={{ 
-            mb: 1, 
-            background: 'rgba(255,255,255,0.05)', 
-            borderRadius: 1.5,
-            border: '1px solid rgba(255,255,255,0.1)'
-          }}>
-            <ListItem sx={{ py: 1 }}>
-              <Avatar sx={{ 
-                mr: 1, 
-                width: 20, 
-                height: 20, 
-                fontSize: '0.7rem',
-                background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)'
-              }}>
-                {c.user_username?.charAt(0).toUpperCase() || '?'}
-              </Avatar>
-              <ListItemText 
-                primary={
-                  <Typography variant="body2" color="white" sx={{ fontWeight: 'bold' }}>
-                    {c.user_username || 'Unknown User'}
-                  </Typography>
-                } 
-                secondary={
-                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                    {c.text}
-                  </Typography>
-                } 
-              />
-            </ListItem>
-          </Card>
-        ))}
-      </List>
-    </Box>
-  );
-}
-
-function Reactions({ postId, currentUser }: { postId: number; currentUser: string }) {
-  const [reactions, setReactions] = useState<any[]>([]);
-  const [userReaction, setUserReaction] = useState<string | null>(null);
-
-  const fetchReactions = useCallback(() => {
-    apiClient.get(`/reactions/post/${postId}/`)
-      .then((res: any) => {
-        setReactions(res.data);
-        const userReact = res.data.find((r: any) => r.user_username === currentUser);
-        setUserReaction(userReact ? userReact.type : null);
-      })
-      .catch(() => setReactions([]));
-  }, [postId, currentUser]);
-
-  useEffect(() => {
-    fetchReactions();
-  }, [fetchReactions]);
-
-  const handleReact = async (type: string) => {
-    try {
-      if (userReaction === type) {
-        // Remove reaction
-        await apiClient.delete(`/reactions/post/${postId}/`);
-        setUserReaction(null);
-      } else {
-        // Add/change reaction
-        await apiClient.post(`/reactions/post/${postId}/`, { type });
-        setUserReaction(type);
-      }
-      fetchReactions();
-    } catch (err) {
-      console.error('Failed to react:', err);
-    }
-  };
-
-  const reactionTypes = ['like', 'love', 'laugh', 'wow', 'sad', 'angry'];
-  const reactionEmojis = { like: '👍', love: '❤️', laugh: '😂', wow: '😮', sad: '😢', angry: '😠' };
-
-  return (
-    <Box sx={{ mt: 2 }}>
-      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        {reactionTypes.map(type => {
-          const count = reactions.filter(r => r.type === type).length;
-          const isActive = userReaction === type;
-          return (
-            <Button
-              key={type}
-              onClick={() => handleReact(type)}
-              size="small"
-              sx={{
-                background: isActive 
-                  ? 'linear-gradient(45deg, #FF6B6B 30%, #FF8E53 90%)' 
-                  : 'rgba(255,255,255,0.1)',
-                color: 'white',
-                borderRadius: 2,
-                px: 1.5,
-                py: 0.5,
-                minWidth: 'fit-content',
-                border: '1px solid rgba(255,255,255,0.2)',
-                transition: 'all 0.2s',
-                '&:hover': {
-                  background: isActive 
-                    ? 'linear-gradient(45deg, #FF8E53 30%, #FF6B6B 90%)'
-                    : 'rgba(255,255,255,0.2)',
-                  transform: 'translateY(-1px)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                }
-              }}
-            >
-              <Typography variant="body2" sx={{ mr: 0.5 }}>
-                {reactionEmojis[type as keyof typeof reactionEmojis]}
-              </Typography>
-              {count > 0 && (
-                <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
-                  {count}
-                </Typography>
-              )}
-            </Button>
-          );
-        })}
-      </Box>
-    </Box>
-  );
-}
-
-function Dashboard() {
-  const { selectedGroup } = useGroup();
-  const [members, setMembers] = useState<any[]>([]);
-  const [posts, setPosts] = useState<any[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [newPost, setNewPost] = useState('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [postError, setPostError] = useState('');
-  const [newEventTitle, setNewEventTitle] = useState('');
-  const [newEventType, setNewEventType] = useState('trip');
-  const [newEventStartTime, setNewEventStartTime] = useState('');
-  const [eventError, setEventError] = useState('');
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [postToDelete, setPostToDelete] = useState<any>(null);
-  const [achievements, setAchievements] = useState<any[]>([]);
-  const [achievementsLoading, setAchievementsLoading] = useState(false);
-
-  const fetchData = () => {
-    if (!selectedGroup) return;
-    setLoading(true);
-    // Fetch group members
-    apiClient.get(`/users/groups/${selectedGroup.group_id}/members/`)
-      .then((res: any) => setMembers(res.data.members))
-      .catch(() => setMembers([]));
-    // Fetch posts
-    apiClient.get(`/posts/?group=${selectedGroup.group_id}`)
-      .then((res: any) => setPosts(res.data))
-      .catch(() => setPosts([]));
-    // Fetch events
-    apiClient.get(`/events/?group=${selectedGroup.group_id}`)
-      .then((res: any) => setEvents(res.data))
-      .catch(() => setEvents([]))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line
-  }, [selectedGroup]);
-
-  useEffect(() => {
-    if (!selectedGroup) return;
-    setAchievementsLoading(true);
-    apiClient.get(`/games/user-achievements/?group=${selectedGroup.group_id}`)
-      .then((res: any) => setAchievements(res.data))
-      .catch(() => setAchievements([]))
-      .finally(() => setAchievementsLoading(false));
-  }, [selectedGroup]);
-
-  const handlePostSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPostError('');
-    
-    // Validate that either text or file is provided
-    if (!newPost.trim() && !selectedFile) {
-      setPostError('Please add some text or upload a photo/video.');
-      return;
-    }
-    
-    try {
-      const formData = new FormData();
-      formData.append('text', newPost);
-      formData.append('group', selectedGroup.group_id.toString());
-      
-      if (selectedFile) {
-        formData.append('media', selectedFile);
-      }
-      
-      await apiClient.post('/posts/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      
-      // Reset form
-      setNewPost('');
-      setSelectedFile(null);
-      setFilePreview(null);
-      fetchData();
-    } catch (err: any) {
-      setPostError(err.response?.data?.error || 'Failed to create post.');
-    }
-  };
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/avi', 'video/mov', 'video/webm'];
-      if (!allowedTypes.includes(file.type)) {
-        setPostError('Please select a valid image or video file.');
-        return;
-      }
-      
-      // Validate file size (50MB max)
-      const maxSize = 50 * 1024 * 1024; // 50MB
-      if (file.size > maxSize) {
-        setPostError('File size must be under 50MB.');
-        return;
-      }
-      
-      setSelectedFile(file);
-      setPostError('');
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFilePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removeFile = () => {
-    setSelectedFile(null);
-    setFilePreview(null);
-  };
-
-  const handleEventSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setEventError('');
-    if (!newEventTitle.trim() || !newEventType || !newEventStartTime) {
-      setEventError('All fields are required.');
-      return;
-    }
-    try {
-      await apiClient.post(
-        '/events/',
-        {
-          title: newEventTitle,
-          type: newEventType,
-          start_time: newEventStartTime,
-          group: selectedGroup.group_id
-        }
-      );
-      setNewEventTitle('');
-      setNewEventType('trip');
-      setNewEventStartTime('');
-      fetchData();
-    } catch (err: any) {
-      setEventError(err.response?.data?.error || 'Failed to create event.');
-    }
-  };
-
-  const handleDeletePost = (post: any) => {
-    setPostToDelete(post);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDeletePost = async () => {
-    if (!postToDelete) return;
-    
-    try {
-      await apiClient.delete(`/posts/${postToDelete.id}/`);
-      setDeleteDialogOpen(false);
-      setPostToDelete(null);
-      fetchData(); // Refresh posts
-    } catch (err: any) {
-      console.error('Failed to delete post:', err);
-      setDeleteDialogOpen(false);
-      setPostToDelete(null);
-    }
-  };
-
-  const cancelDeletePost = () => {
-    setDeleteDialogOpen(false);
-    setPostToDelete(null);
-  };
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  if (!selectedGroup) {
-    return (
+    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
       <Card sx={{ 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        borderRadius: 3,
-        p: 4,
-        textAlign: 'center'
+        maxWidth: 500, 
+        width: '100%',
+        background: 'rgba(26, 26, 58, 0.3)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(0, 255, 136, 0.2)',
+        borderRadius: 4,
+        boxShadow: '0 20px 40px rgba(0, 255, 136, 0.1)',
+        overflow: 'hidden',
+        position: 'relative'
       }}>
-        <Typography variant="h6" fontWeight="bold">
-          🎯 Please select a group to view its dashboard
-        </Typography>
-      </Card>
-    );
-  }
-
-  return (
-    <Box>
-      {/* Header */}
-      <Card sx={{ 
-        mb: 4, 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        borderRadius: 3,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-      }}>
-        <CardContent sx={{ p: 4 }}>
-          <Box display="flex" alignItems="center" mb={2}>
-            <DashboardIcon sx={{ mr: 2, fontSize: 32 }} />
-            <Typography variant="h4" fontWeight="bold">
-              {selectedGroup.group_name}
+        <Box sx={{ 
+          background: 'rgba(0, 255, 136, 0.1)',
+          p: 4, 
+          position: 'relative'
+        }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ 
+              fontFamily: 'Orbitron, monospace',
+              fontWeight: 700,
+              color: '#ffffff',
+              mb: 2
+            }}>
+              🔐 Quantum Credentials
+            </Typography>
+            <Typography variant="subtitle1" sx={{ 
+              opacity: 0.9,
+              color: '#c0c0c0',
+              fontFamily: 'Orbitron, monospace'
+            }}>
+              Set your quantum username & password
             </Typography>
           </Box>
-          <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
-            Welcome back, {selectedGroup.username}! 🚀
-          </Typography>
-        </CardContent>
-      </Card>
-
-      {/* Navigation Section */}
-      <Card sx={{ 
-        mb: 3, 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        borderRadius: 3,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-      }}>
-        <CardContent>
-          <Typography variant="h6" fontWeight="bold" mb={2}>Quick Navigation</Typography>
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <Button
-              component={Link}
-              to="/games"
-              variant="contained"
-              startIcon={<EmojiEventsIcon />}
-              sx={{
-                background: 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)',
-                borderRadius: 2,
-                px: 3,
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #f5576c 0%, #f093fb 100%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 8px 25px rgba(245, 87, 108, 0.3)'
-                }
-              }}
-            >
-              Games & Challenges
-            </Button>
-            <Button
-              component={Link}
-              to="/posts"
-              variant="outlined"
-              startIcon={<PostAddIcon />}
-              sx={{
-                borderColor: 'rgba(255,255,255,0.3)',
-                color: 'white',
-                borderRadius: 2,
-                px: 3,
-                '&:hover': {
-                  borderColor: 'white',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  transform: 'translateY(-2px)'
-                }
-              }}
-            >
-              View All Posts
-            </Button>
-            <Button
-              component={Link}
-              to="/events"
-              variant="outlined"
-              startIcon={<EventIcon />}
-              sx={{
-                borderColor: 'rgba(255,255,255,0.3)',
-                color: 'white',
-                borderRadius: 2,
-                px: 3,
-                '&:hover': {
-                  borderColor: 'white',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  transform: 'translateY(-2px)'
-                }
-              }}
-            >
-              View All Events
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
-
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 2, md: 3 } }}>
-        {/* Members Section */}
-        <Box sx={{ width: { xs: '100%', md: '30%' }, mb: { xs: 2, md: 0 } }}>
-          <Card sx={{ 
-            height: 'fit-content',
-            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            color: 'white',
-            borderRadius: 3,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-          }}>
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={3}>
-                <GroupIcon sx={{ mr: 1, fontSize: 28 }} />
-                <Typography variant="h6" fontWeight="bold">Group Members</Typography>
-              </Box>
-              <List sx={{ p: 0 }}>
-                {members.map((m: any, index: number) => (
-                  <Card key={m.user_id} sx={{ 
-                    mb: 2, 
-                    background: 'rgba(255,255,255,0.1)', 
-                    borderRadius: 2,
-                    border: '1px solid rgba(255,255,255,0.2)'
-                  }}>
-                    <ListItem>
-                      <Avatar sx={{ 
-                        mr: 2, 
-                        background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
-                        fontWeight: 'bold',
-                        width: { xs: 28, sm: 36 },
-                        height: { xs: 28, sm: 36 },
-                        fontSize: { xs: 16, sm: 20 }
-                      }}>
-                        {m.username.charAt(0).toUpperCase()}
-                      </Avatar>
-                      <ListItemText 
-                        primary={
-                          <Typography variant="subtitle1" fontWeight="bold" color="white">
-                            {m.username}
-                          </Typography>
-                        } 
-                        secondary={
-                          <Chip 
-                            label={m.role} 
-                            size="small" 
-                            sx={{ 
-                              background: 'rgba(255,255,255,0.2)', 
-                              color: 'white',
-                              fontWeight: 'bold',
-                              mt: 0.5
-                            }} 
-                          />
-                        } 
-                      />
-                    </ListItem>
-                  </Card>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
         </Box>
-
-        {/* Posts Section */}
-        <Box sx={{ width: { xs: '100%', md: '70%' } }}>
-          <Card sx={{ 
-            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            color: 'white',
-            borderRadius: 3,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-          }}>
-            <CardContent sx={{ p: { xs: 2, md: 4 } }}>
-              <Box display="flex" alignItems="center" mb={3}>
-                <PostAddIcon sx={{ mr: 1, fontSize: 28 }} />
-                <Typography variant="h6" fontWeight="bold">Posts</Typography>
-              </Box>
-              
-              {/* Create Post Form */}
-              <Card sx={{ 
-                mb: 3, 
-                background: 'rgba(255,255,255,0.1)', 
-                borderRadius: 2,
-                border: '1px solid rgba(255,255,255,0.2)'
-              }}>
-                <CardContent>
-                  <Box component="form" onSubmit={handlePostSubmit}>
-                    {/* Text Input */}
-                    <TextField
-                      label="Share something..."
-                      value={newPost}
-                      onChange={e => setNewPost(e.target.value)}
-                      fullWidth
-                      multiline
-                      rows={2}
-                      sx={{ 
-                        mb: 2,
-                        '& .MuiOutlinedInput-root': {
-                          backgroundColor: 'rgba(255,255,255,0.1)',
-                          color: 'white',
-                          '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-                          '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
-                          '&.Mui-focused fieldset': { borderColor: 'white' }
-                        },
-                        '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
-                        '& .MuiInputBase-input': { color: 'white' }
-                      }}
-                    />
-                    
-                    {/* File Preview */}
-                    {filePreview && (
-                      <Box sx={{ mb: 2, position: 'relative' }}>
-                        {selectedFile?.type.startsWith('image/') ? (
-                          <img 
-                            src={filePreview} 
-                            alt="Preview" 
-                            style={{ 
-                              maxWidth: '100%', 
-                              maxHeight: '300px', 
-                              borderRadius: '8px',
-                              objectFit: 'cover'
-                            }} 
-                          />
-                        ) : (
-                          <video 
-                            src={filePreview} 
-                            controls 
-                            style={{ 
-                              maxWidth: '100%', 
-                              maxHeight: '300px', 
-                              borderRadius: '8px'
-                            }} 
-                          />
-                        )}
-                        <Button
-                          onClick={removeFile}
-                          sx={{
-                            position: 'absolute',
-                            top: 8,
-                            right: 8,
-                            minWidth: 'auto',
-                            width: 32,
-                            height: 32,
-                            borderRadius: '50%',
-                            backgroundColor: 'rgba(0,0,0,0.7)',
-                            color: 'white',
-                            '&:hover': {
-                              backgroundColor: 'rgba(0,0,0,0.9)',
-                            }
-                          }}
-                        >
-                          ×
-                        </Button>
-                      </Box>
-                    )}
-                    
-                    {/* Action Buttons */}
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                      <input
-                        accept="image/*,video/*"
-                        style={{ display: 'none' }}
-                        id="file-upload"
-                        type="file"
-                        onChange={handleFileSelect}
-                      />
-                      <label htmlFor="file-upload">
-                        <Button
-                          component="span"
-                          variant="outlined"
-                          startIcon={<AttachFileIcon />}
-                          sx={{ 
-                            borderColor: 'rgba(255,255,255,0.3)',
-                            color: 'white',
-                            '&:hover': {
-                              borderColor: 'white',
-                              backgroundColor: 'rgba(255,255,255,0.1)'
-                            }
-                          }}
-                        >
-                          {selectedFile ? 'Change File' : 'Add Photo/Video'}
-                        </Button>
-                      </label>
-                      
-                      <Button 
-                        type="submit" 
-                        variant="contained" 
-                        sx={{ 
-                          background: 'linear-gradient(45deg, #4CAF50 30%, #45a049 90%)',
-                          borderRadius: 2,
-                          px: 3,
-                          minWidth: 'fit-content',
-                          boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #45a049 30%, #4CAF50 90%)',
-                            boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)'
-                          }
-                        }}
-                      >
-                        Post
-                      </Button>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-              
-              {postError && (
-                <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-                  {postError}
-                </Alert>
-              )}
-              
-              {loading ? (
-                <Box textAlign="center" py={4}>
-                  <Typography>Loading posts...</Typography>
-                </Box>
-              ) : (
-                <List sx={{ p: 0 }}>
-                  {posts.map((p: any) => (
-                    <Card key={p.id} sx={{ 
-                      mb: 2, 
-                      background: 'rgba(255,255,255,0.1)', 
-                      borderRadius: 2,
-                      border: '1px solid rgba(255,255,255,0.2)'
-                    }}>
-                                          <CardContent>
-                      {/* Post Text */}
-                      {p.text && (
-                        <Typography variant="body1" sx={{ mb: 2, color: 'white' }}>
-                          {p.text}
-                        </Typography>
-                      )}
-                      
-                      {/* Post Media */}
-                      {p.media_url && (
-                        <Box sx={{ mb: 2, borderRadius: 2, overflow: 'hidden' }}>
-                          {p.media_type === 'image' ? (
-                            <img 
-                              src={p.media_url} 
-                              alt="Post content" 
-                              style={{ 
-                                maxWidth: '100%', 
-                                maxHeight: '500px', 
-                                objectFit: 'cover',
-                                borderRadius: '8px'
-                              }} 
-                              onError={(e) => {
-                                console.error('Image failed to load:', p.media_url);
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          ) : p.media_type === 'video' ? (
-                            <video 
-                              src={p.media_url} 
-                              controls 
-                              style={{ 
-                                maxWidth: '100%', 
-                                maxHeight: '500px',
-                                borderRadius: '8px'
-                              }} 
-                              onError={(e) => {
-                                console.error('Video failed to load:', p.media_url);
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          ) : null}
-                        </Box>
-                      )}
-                      
-                      {/* Post Meta */}
-                      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                        <Box display="flex" alignItems="center">
-                          <Avatar sx={{ 
-                            mr: 1, 
-                            width: 24, 
-                            height: 24, 
-                            fontSize: '0.8rem',
-                            background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)'
-                          }}>
-                            {p.author_username.charAt(0).toUpperCase()}
-                          </Avatar>
-                          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                            {p.author_username} • {new Date(p.created_at).toLocaleString()}
-                          </Typography>
-                        </Box>
-                        
-                        {/* Delete Button - Only show for post author */}
-                        {p.author_username === selectedGroup.username && (
-                          <Button
-                            onClick={() => handleDeletePost(p)}
-                            size="small"
-                            sx={{
-                              minWidth: 'auto',
-                              width: 32,
-                              height: 32,
-                              borderRadius: '50%',
-                              backgroundColor: 'rgba(244, 67, 54, 0.8)',
-                              color: 'white',
-                              '&:hover': {
-                                backgroundColor: 'rgba(244, 67, 54, 1)',
-                              }
-                            }}
-                          >
-                            <DeleteIcon sx={{ fontSize: 16 }} />
-                          </Button>
-                        )}
-                      </Box>
-                      <Reactions postId={p.id} currentUser={p.author_username} />
-                      <Comments postId={p.id} />
-                    </CardContent>
-                    </Card>
-                  ))}
-                </List>
-              )}
-            </CardContent>
-          </Card>
-        </Box>
-      </Box>
-
-      {/* Events Section */}
-      <Box sx={{ mt: 4 }}>
-        <Card sx={{ 
-          background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-          borderRadius: 3,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-        }}>
-          <CardContent>
-            <Box display="flex" alignItems="center" mb={3}>
-              <EventIcon sx={{ mr: 1, fontSize: 28, color: '#333' }} />
-              <Typography variant="h6" fontWeight="bold" color="#333">Events</Typography>
-            </Box>
-            
-            {/* Create Event Form */}
-            <Card sx={{ 
-              mb: 3, 
-              background: 'rgba(255,255,255,0.7)', 
+        <CardContent sx={{ p: 4 }}>
+          {success ? (
+            <Alert severity="success" sx={{ 
               borderRadius: 2,
-              border: '1px solid rgba(0,0,0,0.1)'
+              backgroundColor: 'rgba(0, 255, 136, 0.1)',
+              border: '1px solid rgba(0, 255, 136, 0.3)',
+              color: '#00ff88'
             }}>
-              <CardContent>
-                <Box component="form" onSubmit={handleEventSubmit} sx={{ 
-                  display: 'flex', 
-                  gap: 2, 
-                  flexWrap: 'wrap', 
-                  alignItems: 'center' 
-                }}>
-                  <TextField
-                    label="Event Title"
-                    value={newEventTitle}
-                    onChange={e => setNewEventTitle(e.target.value)}
-                    required
-                    sx={{ flex: 2, minWidth: 200 }}
-                  />
-                  <TextField
-                    label="Type"
-                    select
-                    SelectProps={{ native: true }}
-                    value={newEventType}
-                    onChange={e => setNewEventType(e.target.value)}
-                    required
-                    sx={{ flex: 1, minWidth: 120 }}
-                  >
-                    <option value="trip">Trip</option>
-                    <option value="goal">Goal</option>
-                    <option value="meeting">Meeting</option>
-                  </TextField>
-                  <TextField
-                    label="Start Time"
-                    type="datetime-local"
-                    value={newEventStartTime}
-                    onChange={e => setNewEventStartTime(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                    required
-                    sx={{ flex: 2, minWidth: 200 }}
-                  />
-                  <Button 
-                    type="submit" 
-                    variant="contained" 
-                    sx={{ 
-                      background: 'linear-gradient(45deg, #FF6B6B 30%, #FF8E53 90%)',
-                      borderRadius: 2,
-                      px: 3,
-                      minWidth: 'fit-content',
-                      boxShadow: '0 4px 15px rgba(255, 107, 107, 0.3)',
-                      '&:hover': {
-                        background: 'linear-gradient(45deg, #FF8E53 30%, #FF6B6B 90%)',
-                        boxShadow: '0 6px 20px rgba(255, 107, 107, 0.4)'
-                      }
-                    }}
-                  >
-                    Add Event
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-            
-            {eventError && (
-              <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-                {eventError}
-              </Alert>
-            )}
-            
-            {loading ? (
-              <Box textAlign="center" py={4}>
-                <Typography color="#333">Loading events...</Typography>
-              </Box>
-            ) : (
-              <Box sx={{ 
-                display: 'grid', 
-                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-                gap: 2 
-              }}>
-                {events.map((ev: any) => (
-                  <Card key={ev.id} sx={{ 
-                    background: 'rgba(255,255,255,0.8)', 
-                    borderRadius: 2,
-                    border: '1px solid rgba(0,0,0,0.1)',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
-                    }
-                  }}>
-                    <CardContent>
-                      <Typography variant="h6" fontWeight="bold" color="#333" gutterBottom>
-                        {ev.title}
-                      </Typography>
-                      <Chip 
-                        label={ev.type} 
-                        size="small" 
-                        sx={{ 
-                          background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
-                          color: 'white',
-                          fontWeight: 'bold',
-                          mb: 1
-                        }} 
-                      />
-                      <Typography variant="body2" color="#666" sx={{ mt: 1 }}>
-                        📅 {new Date(ev.start_time).toLocaleString()}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ))}
-              </Box>
-            )}
-          </CardContent>
-        </Card>
-      </Box>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={cancelDeletePost}
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            maxWidth: 400,
-            width: '100%'
-          }
-        }}
-        fullScreen={isMobile}
-      >
-        <DialogTitle sx={{ 
-          background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
-          color: 'white',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1
-        }}>
-          <DeleteIcon />
-          Delete Post
-        </DialogTitle>
-        <DialogContent sx={{ p: { xs: 1.5, sm: 3 } }}>
-          <Typography variant="body1" gutterBottom>
-            Are you sure you want to delete this post?
-          </Typography>
-          {postToDelete && (
-            <Box sx={{ mt: 2, p: 2, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                "{postToDelete.text ? postToDelete.text.substring(0, 100) + (postToDelete.text.length > 100 ? '...' : '') : 'Media post'}"
-              </Typography>
-            </Box>
-          )}
-          <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-            This action cannot be undone. All comments and reactions will also be deleted.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ p: { xs: 1.5, sm: 3 }, gap: 1 }}>
-          <Button 
-            onClick={cancelDeletePost}
-            variant="outlined"
-            sx={{ 
-              borderColor: 'rgba(0,0,0,0.2)',
-              '&:hover': {
-                borderColor: 'rgba(0,0,0,0.4)'
-              }
-            }}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={confirmDeletePost}
-            variant="contained"
-            sx={{ 
-              background: 'linear-gradient(45deg, #f44336 30%, #d32f2f 90%)',
-              '&:hover': {
-                background: 'linear-gradient(45deg, #d32f2f 30%, #f44336 90%)',
-              }
-            }}
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* My Achievements Card */}
-      <Card sx={{ mb: 3, background: 'linear-gradient(135deg, #ffe259 0%, #ffa751 100%)', color: 'white', borderRadius: 3, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
-        <CardContent>
-          <Box display="flex" alignItems="center" mb={2}>
-            <EmojiEventsIcon sx={{ mr: 1, fontSize: 28 }} />
-            <Typography variant="h6" fontWeight="bold">My Achievements</Typography>
-          </Box>
-          {achievementsLoading ? (
-            <Box sx={{ textAlign: 'center', py: 2 }}>
-              <CircularProgress color="inherit" />
-            </Box>
-          ) : achievements.length === 0 ? (
-            <Typography variant="body2" color="white">No achievements yet. Start engaging to earn badges!</Typography>
+              Quantum credentials updated! Redirecting to login...
+            </Alert>
           ) : (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              {achievements.map((ua) => (
-                <Card key={ua.id} sx={{ minWidth: 180, maxWidth: 220, background: 'rgba(255,255,255,0.15)', color: 'white', borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                  <CardContent>
-                    <Box display="flex" alignItems="center" gap={1} mb={1}>
-                      <Avatar sx={{ bgcolor: '#fffde4', color: '#ffa751', width: 36, height: 36, fontSize: 22 }}>
-                        {/* Use icon name or fallback */}
-                        <EmojiEventsIcon />
-                      </Avatar>
-                      <Typography variant="subtitle1" fontWeight="bold" sx={{ color: '#fff' }}>{ua.achievement.name}</Typography>
-                    </Box>
-                    <Typography variant="body2" sx={{ color: '#fffde4' }}>{ua.achievement.description}</Typography>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
+            <form onSubmit={handleSubmit}>
+              <TextField
+                label="New Username"
+                value={newUsername}
+                onChange={e => setNewUsername(e.target.value)}
+                fullWidth
+                required
+                sx={{ 
+                  mb: 3,
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                    color: 'white',
+                    '& fieldset': { borderColor: 'rgba(0, 255, 136, 0.3)' },
+                    '&:hover fieldset': { borderColor: 'rgba(0, 255, 136, 0.5)' },
+                    '&.Mui-focused fieldset': { borderColor: '#00ff88' }
+                  },
+                  '& .MuiInputLabel-root': { color: 'rgba(0, 255, 136, 0.8)' },
+                  '& .MuiInputBase-input': { color: 'white' }
+                }}
+              />
+              <TextField
+                label="New Password"
+                type="password"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                fullWidth
+                required
+                sx={{ 
+                  mb: 3,
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                    color: 'white',
+                    '& fieldset': { borderColor: 'rgba(0, 255, 136, 0.3)' },
+                    '&:hover fieldset': { borderColor: 'rgba(0, 255, 136, 0.5)' },
+                    '&.Mui-focused fieldset': { borderColor: '#00ff88' }
+                  },
+                  '& .MuiInputLabel-root': { color: 'rgba(0, 255, 136, 0.8)' },
+                  '& .MuiInputBase-input': { color: 'white' }
+                }}
+              />
+              {error && (
+                Array.isArray(error) ? error.map((msg, idx) => (
+                  <Alert severity="error" sx={{ 
+                    mb: 1, 
+                    borderRadius: 2,
+                    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                    border: '1px solid rgba(244, 67, 54, 0.3)'
+                  }} key={idx}>{msg}</Alert>
+                )) : <Alert severity="error" sx={{ 
+                  mb: 3, 
+                  borderRadius: 2,
+                  backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                  border: '1px solid rgba(244, 67, 54, 0.3)'
+                }}>{error}</Alert>
+              )}
+              <Button 
+                type="submit" 
+                variant="contained" 
+                fullWidth 
+                size="large"
+                disabled={loading}
+                sx={{ 
+                  background: 'linear-gradient(45deg, #00ff88 0%, #00cc6a 100%)',
+                  color: '#0a0a1a',
+                  borderRadius: 3,
+                  py: 1.5,
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  fontFamily: 'Orbitron, monospace',
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                  boxShadow: '0 4px 15px rgba(0, 255, 136, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #00cc6a 0%, #00ff88 100%)',
+                    boxShadow: '0 6px 20px rgba(0, 255, 136, 0.4)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                {loading ? 'Updating Quantum Credentials...' : '🚀 Update Quantum Credentials'}
+              </Button>
+            </form>
           )}
         </CardContent>
       </Card>
@@ -1901,13 +800,7 @@ function Dashboard() {
   );
 }
 
-function Posts() {
-  return <div>Posts Page</div>;
-}
 
-function Events() {
-  return <div>Events Page</div>;
-}
 
 function Games() {
   const { selectedGroup } = useGroup();
@@ -2496,14 +1389,20 @@ function Games() {
   if (!selectedGroup) {
     return (
       <Card sx={{ 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
+        background: 'rgba(26, 26, 58, 0.3)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(0, 255, 136, 0.2)',
         borderRadius: 3,
+        boxShadow: '0 8px 32px rgba(0, 255, 136, 0.1)',
         p: 4,
         textAlign: 'center'
       }}>
-        <Typography variant="h6" fontWeight="bold">
-          🎯 Please select a group to view games
+        <Typography variant="h6" sx={{ 
+          fontFamily: 'Orbitron, monospace',
+          color: '#00ff88',
+          fontWeight: 700
+        }}>
+          🎯 Please select a group to view quantum games
         </Typography>
       </Card>
     );
@@ -2511,65 +1410,88 @@ function Games() {
 
   return (
     <Box>
-      {/* Header */}
+      {/* Quantum Header */}
       <Card sx={{ 
         mb: 4, 
-        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        color: 'white',
+        background: 'rgba(26, 26, 58, 0.3)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(0, 255, 136, 0.2)',
         borderRadius: 3,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+        boxShadow: '0 8px 32px rgba(0, 255, 136, 0.1)'
       }}>
         <CardContent sx={{ p: 4 }}>
           <Box display="flex" alignItems="center" mb={2}>
-            <EmojiEventsIcon sx={{ mr: 2, fontSize: 32 }} />
-            <Typography variant="h4" fontWeight="bold">
-              Games & Challenges
+            <EmojiEventsIcon sx={{ mr: 2, fontSize: 32, color: '#00ff88' }} />
+            <Typography variant="h4" sx={{ 
+              fontFamily: 'Orbitron, monospace',
+              fontWeight: 700,
+              color: '#ffffff'
+            }}>
+              Quantum Games & Challenges
             </Typography>
           </Box>
-          <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
-            Level up your group engagement! 🚀
+          <Typography variant="subtitle1" sx={{ 
+            opacity: 0.9,
+            color: '#c0c0c0',
+            fontFamily: 'Orbitron, monospace'
+          }}>
+            Level up your group engagement with quantum mechanics! 🚀
           </Typography>
         </CardContent>
       </Card>
 
-      {/* User Stats Card */}
+      {/* Quantum User Stats Card */}
       {userStats && (
         <Card sx={{ 
           mb: 3, 
-          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-          color: 'white',
+          background: 'rgba(26, 26, 58, 0.3)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(0, 255, 136, 0.2)',
           borderRadius: 3,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+          boxShadow: '0 8px 32px rgba(0, 255, 136, 0.1)'
         }}>
           <CardContent>
             <Box display="flex" alignItems="center" mb={2}>
-              <StarIcon sx={{ mr: 1, fontSize: 28 }} />
-              <Typography variant="h6" fontWeight="bold">Your Stats</Typography>
+              <StarIcon sx={{ mr: 1, fontSize: 28, color: '#00ff88' }} />
+              <Typography variant="h6" sx={{ 
+                fontWeight: 700,
+                color: '#ffffff',
+                fontFamily: 'Orbitron, monospace'
+              }}>
+                Your Quantum Stats
+              </Typography>
             </Box>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               <Box sx={{ textAlign: 'center', minWidth: 80 }}>
-                <Typography variant="h4" fontWeight="bold">{userStats.total_points}</Typography>
-                <Typography variant="body2">Points</Typography>
+                <Typography variant="h4" sx={{ fontWeight: 700, color: '#00ff88' }}>{userStats.total_points}</Typography>
+                <Typography variant="body2" sx={{ color: '#c0c0c0' }}>Points</Typography>
               </Box>
               <Box sx={{ textAlign: 'center', minWidth: 80 }}>
-                <Typography variant="h4" fontWeight="bold">{userStats.total_posts}</Typography>
-                <Typography variant="body2">Posts</Typography>
+                <Typography variant="h4" sx={{ fontWeight: 700, color: '#00ff88' }}>{userStats.total_posts}</Typography>
+                <Typography variant="body2" sx={{ color: '#c0c0c0' }}>Posts</Typography>
               </Box>
               <Box sx={{ textAlign: 'center', minWidth: 80 }}>
-                <Typography variant="h4" fontWeight="bold">{userStats.challenges_completed}</Typography>
-                <Typography variant="body2">Challenges</Typography>
+                <Typography variant="h4" sx={{ fontWeight: 700, color: '#00ff88' }}>{userStats.challenges_completed}</Typography>
+                <Typography variant="body2" sx={{ color: '#c0c0c0' }}>Challenges</Typography>
               </Box>
               <Box sx={{ textAlign: 'center', minWidth: 80 }}>
-                <Typography variant="h4" fontWeight="bold">{userStats.rank || 'N/A'}</Typography>
-                <Typography variant="body2">Rank</Typography>
+                <Typography variant="h4" sx={{ fontWeight: 700, color: '#00ff88' }}>{userStats.rank || 'N/A'}</Typography>
+                <Typography variant="body2" sx={{ color: '#c0c0c0' }}>Rank</Typography>
               </Box>
             </Box>
           </CardContent>
         </Card>
       )}
 
-      {/* Tabs */}
-      <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
+      {/* Quantum Tabs */}
+      <Card sx={{ 
+        mb: 3, 
+        background: 'rgba(26, 26, 58, 0.3)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(0, 255, 136, 0.2)',
+        borderRadius: 3,
+        boxShadow: '0 8px 32px rgba(0, 255, 136, 0.1)'
+      }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs 
             value={activeTab} 
@@ -2581,7 +1503,15 @@ function Games() {
                 fontWeight: 'bold',
                 fontSize: { xs: '0.8rem', sm: '0.9rem' },
                 minHeight: { xs: 48, sm: 64 },
-                minWidth: { xs: 80, sm: 120 }
+                minWidth: { xs: 80, sm: 120 },
+                color: '#c0c0c0',
+                fontFamily: 'Orbitron, monospace',
+                '&.Mui-selected': {
+                  color: '#00ff88'
+                }
+              },
+              '& .MuiTabs-indicator': {
+                backgroundColor: '#00ff88'
               }
             }}
           >
@@ -2632,12 +1562,22 @@ function Games() {
                   startIcon={<AddIcon />}
                   onClick={() => setShowCreateChallenge(true)}
                   sx={{
-                    background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                    background: 'linear-gradient(45deg, #00ff88 0%, #00cc6a 100%)',
+                    color: '#0a0a1a',
+                    fontWeight: 600,
+                    fontFamily: 'Orbitron, monospace',
+                    textTransform: 'uppercase',
+                    letterSpacing: 1,
                     borderRadius: 2,
-                    width: { xs: '100%', sm: 'auto' }
+                    width: { xs: '100%', sm: 'auto' },
+                    '&:hover': {
+                      background: 'linear-gradient(45deg, #00cc6a 0%, #00ff88 100%)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 10px 25px rgba(0, 255, 136, 0.4)'
+                    }
                   }}
                 >
-                  Create Challenge
+                  Create Quantum Challenge
                 </Button>
               </Box>
               
@@ -2646,12 +1586,19 @@ function Games() {
                   <CircularProgress />
                 </Box>
               ) : filteredChallenges.length === 0 ? (
-                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
-                  <EmojiEventsIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-                  <Typography variant="h6" color="text.secondary" gutterBottom>
-                    No challenges yet
+                <Card sx={{ 
+                  p: 3, 
+                  textAlign: 'center', 
+                  background: 'rgba(26, 26, 58, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(0, 255, 136, 0.3)',
+                  borderRadius: 2
+                }}>
+                  <EmojiEventsIcon sx={{ fontSize: 48, color: '#00ff88', mb: 2 }} />
+                  <Typography variant="h6" sx={{ color: '#ffffff', fontFamily: 'Orbitron, monospace' }} gutterBottom>
+                    No quantum challenges yet
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{ color: '#c0c0c0' }}>
                     Create the first challenge to get your group engaged!
                   </Typography>
                 </Card>
@@ -2660,8 +1607,9 @@ function Games() {
                   {filteredChallenges.map((challenge) => (
                     <Card key={challenge.id} sx={{ 
                       borderRadius: 2,
-                      border: challenge.is_current ? '2px solid #4caf50' : '1px solid #e0e0e0',
-                      background: challenge.is_current ? 'rgba(76, 175, 80, 0.05)' : 'white'
+                      border: challenge.is_current ? '2px solid #00ff88' : '1px solid rgba(0, 255, 136, 0.3)',
+                      background: challenge.is_current ? 'rgba(0, 255, 136, 0.1)' : 'rgba(26, 26, 58, 0.2)',
+                      backdropFilter: 'blur(10px)'
                     }}>
                       <CardContent>
                         <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
@@ -5418,35 +4366,108 @@ function Documentation() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   return (
     <>
-      <Button color="inherit" onClick={handleOpen} sx={{ ml: 2 }}>
-        <HelpIcon sx={{ mr: 1, fontSize: 20 }} />
-        Documentation
-      </Button>
-      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth fullScreen={isMobile}>
+      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <Button 
+          onClick={handleOpen} 
+          sx={{ 
+            ml: 2,
+            background: 'rgba(0, 255, 136, 0.1)',
+            border: '1px solid rgba(0, 255, 136, 0.3)',
+            color: '#00ff88',
+            fontFamily: 'Orbitron, monospace',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            '&:hover': {
+              background: 'rgba(0, 255, 136, 0.2)',
+              borderColor: '#00ff88',
+              boxShadow: '0 0 20px rgba(0, 255, 136, 0.3)'
+            }
+          }}
+        >
+          <HelpIcon sx={{ mr: 1, fontSize: 20 }} />
+          Documentation
+        </Button>
+      </motion.div>
+      <Dialog 
+        open={open} 
+        onClose={handleClose} 
+        maxWidth="md" 
+        fullWidth 
+        fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            background: 'rgba(26, 26, 58, 0.95)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(0, 255, 136, 0.2)',
+            borderRadius: 3,
+            boxShadow: '0 20px 60px rgba(0, 255, 136, 0.2)'
+          }
+        }}
+      >
         <DialogTitle sx={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
+          background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%)',
+          color: '#00ff88',
           display: 'flex',
           alignItems: 'center',
-          gap: 1
+          gap: 1,
+          fontFamily: 'Orbitron, monospace',
+          fontWeight: 700,
+          borderBottom: '1px solid rgba(0, 255, 136, 0.3)'
         }}>
-          <CodeIcon />
-          Bonded Social Platform - Complete Documentation (v1.3.0)
+          <CodeIcon sx={{ color: '#00ff88' }} />
+          QUANTUM DOCUMENTATION - BONDED v1.4.0
         </DialogTitle>
-        <DialogContent sx={{ p: { xs: 1, sm: 3 } }}>
+        <DialogContent sx={{ 
+          p: { xs: 1, sm: 3 },
+          background: 'rgba(26, 26, 58, 0.3)',
+          '& .MuiAccordion-root': {
+            background: 'rgba(26, 26, 58, 0.2)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(0, 255, 136, 0.1)',
+            borderRadius: 2,
+            mb: 2,
+            '&:before': { display: 'none' },
+            '&.Mui-expanded': {
+              borderColor: 'rgba(0, 255, 136, 0.3)',
+              boxShadow: '0 0 20px rgba(0, 255, 136, 0.1)'
+            }
+          },
+          '& .MuiAccordionSummary-root': {
+            color: '#00ff88',
+            fontFamily: 'Orbitron, monospace',
+            fontWeight: 600,
+            '&:hover': {
+              background: 'rgba(0, 255, 136, 0.1)'
+            }
+          },
+          '& .MuiAccordionDetails-root': {
+            color: '#e0e0e0',
+            background: 'rgba(0, 0, 0, 0.2)'
+          }
+        }}>
           <Box sx={{ maxHeight: '70vh', overflow: 'auto' }}>
             {/* Overview */}
-            <Accordion defaultExpanded>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6" fontWeight="bold">
-                  🚀 Project Overview
-                </Typography>
-              </AccordionSummary>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Accordion defaultExpanded>
+                <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#00ff88' }} />}>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 700,
+                    fontFamily: 'Orbitron, monospace',
+                    color: '#00ff88'
+                  }}>
+                    🚀 QUANTUM OVERVIEW
+                  </Typography>
+                </AccordionSummary>
               <AccordionDetails>
                 <Typography paragraph>
                   <strong>Bonded</strong> is a modern, group-based social platform for sharing memories, planning events, and playing interactive games. Each group is isolated, with unique usernames per group. The platform now features a suite of social games, exclusive Cloudinary media storage, and a streamlined login flow (no group selection after login).
                 </Typography>
-                <Typography variant="h6" gutterBottom>Key Features (v1.3.0):</Typography>
+                <Typography variant="h6" gutterBottom>Key Features (v1.4.0):</Typography>
                 <List dense>
                   <ListItem>• Group-based social networking with isolated data</ListItem>
                   <ListItem>• Multi-group membership support</ListItem>
@@ -5460,11 +4481,16 @@ function Documentation() {
                 </List>
               </AccordionDetails>
             </Accordion>
+            </motion.div>
             {/* Architecture */}
             <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6" fontWeight="bold">
-                  🏗️ System Architecture
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#00ff88' }} />}>
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 700,
+                  fontFamily: 'Orbitron, monospace',
+                  color: '#00ff88'
+                }}>
+                  🏗️ QUANTUM ARCHITECTURE
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -5489,30 +4515,38 @@ function Documentation() {
             </Accordion>
             {/* Database Models */}
             <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6" fontWeight="bold">
-                  <StorageIcon sx={{ mr: 1 }} />
-                  Database Models
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#00ff88' }} />}>
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 700,
+                  fontFamily: 'Orbitron, monospace',
+                  color: '#00ff88'
+                }}>
+                  <StorageIcon sx={{ mr: 1, color: '#00ff88' }} />
+                  QUANTUM DATABASE
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <Typography variant="h6" gutterBottom>Core Models:</Typography>
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">User</Typography><Typography variant="body2">Custom user model with email, password, and group memberships.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Group</Typography><Typography variant="body2">Represents social groups with name and member relationships.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">GroupMembership</Typography><Typography variant="body2">Links users to groups with username and role per group.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Post</Typography><Typography variant="body2">User posts with text, group, and Cloudinary media.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Event</Typography><Typography variant="body2">Events with title, type, start_time, and group association.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Comment</Typography><Typography variant="body2">Comments on posts with text and user association.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Reaction</Typography><Typography variant="body2">User reactions to posts (like, love, laugh, wow, sad, angry).</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(102, 126, 234, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="primary">Game & Challenge Models</Typography><Typography variant="body2">Photo Memory, Word Association, Poll, Two Truths and a Lie, Would You Rather, This or That, Fill in the Blank, Creative Challenges, Streaks, Leaderboards, Achievements, and related user/game state models.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>User</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Custom user model with email, password, and group memberships.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>Group</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Represents social groups with name and member relationships.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>GroupMembership</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Links users to groups with username and role per group.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>Post</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>User posts with text, group, and Cloudinary media.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>Event</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Events with title, type, start_time, and group association.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>Comment</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Comments on posts with text and user association.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>Reaction</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>User reactions to posts (like, love, laugh, wow, sad, angry).</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>Game & Challenge Models</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Photo Memory, Word Association, Poll, Two Truths and a Lie, Would You Rather, This or That, Fill in the Blank, Creative Challenges, Streaks, Leaderboards, Achievements, and related user/game state models.</Typography></CardContent></Card>
               </AccordionDetails>
             </Accordion>
             {/* API Endpoints */}
             <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6" fontWeight="bold">
-                  <ApiIcon sx={{ mr: 1 }} />
-                  API Endpoints
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#00ff88' }} />}>
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 700,
+                  fontFamily: 'Orbitron, monospace',
+                  color: '#00ff88'
+                }}>
+                  <ApiIcon sx={{ mr: 1, color: '#00ff88' }} />
+                  QUANTUM API
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -5554,21 +4588,25 @@ function Documentation() {
             </Accordion>
             {/* Frontend Components */}
             <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6" fontWeight="bold">
-                  <BuildIcon sx={{ mr: 1 }} />
-                  Frontend Components
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#00ff88' }} />}>
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 700,
+                  fontFamily: 'Orbitron, monospace',
+                  color: '#00ff88'
+                }}>
+                  <BuildIcon sx={{ mr: 1, color: '#00ff88' }} />
+                  QUANTUM COMPONENTS
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <Typography variant="h6" gutterBottom>Core Components:</Typography>
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">App Component</Typography><Typography variant="body2">Main application component with routing, authentication gate, and global state management.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">GroupProvider & GroupContext</Typography><Typography variant="body2">React Context for managing group memberships and selected group state across the application. Group selection is now automatic after login.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">Onboarding Component</Typography><Typography variant="body2">Group registration form with credential generation and sharing functionality.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">Login Component</Typography><Typography variant="body2">Group-based login form with credential change flow integration. No manual group selection after login.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">Dashboard Component</Typography><Typography variant="body2">Main dashboard showing group members, posts, events, and creation forms with modern UI.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">Games Component</Typography><Typography variant="body2">Tab-based interface for all social games, including Photo Memory, Word Association, Polls, and more.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(76, 175, 80, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="success.main">Comments & Reactions Components</Typography><Typography variant="body2">Real-time comment and reaction display and creation with user avatars and emoji icons.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>App Component</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Main application component with routing, authentication gate, and global state management.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>GroupProvider & GroupContext</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>React Context for managing group memberships and selected group state across the application. Group selection is now automatic after login.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>Onboarding Component</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Group registration form with credential generation and sharing functionality.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>Login Component</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Group-based login form with credential change flow integration. No manual group selection after login.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>Dashboard Component</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Main dashboard showing group members, posts, events, and creation forms with modern UI.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>Games Component</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Tab-based interface for all social games, including Photo Memory, Word Association, Polls, and more.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00ff88', fontFamily: 'Orbitron, monospace' }}>Comments & Reactions Components</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Real-time comment and reaction display and creation with user avatars and emoji icons.</Typography></CardContent></Card>
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Key UI Features:</Typography>
                 <List dense>
                   <ListItem>• <strong>Responsive Design</strong> - Mobile-first with Material-UI</ListItem>
@@ -5581,10 +4619,14 @@ function Documentation() {
             </Accordion>
             {/* Security Features */}
             <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6" fontWeight="bold">
-                  <SecurityIcon sx={{ mr: 1 }} />
-                  Security Features
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#00ff88' }} />}>
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 700,
+                  fontFamily: 'Orbitron, monospace',
+                  color: '#00ff88'
+                }}>
+                  <SecurityIcon sx={{ mr: 1, color: '#00ff88' }} />
+                  QUANTUM SECURITY
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -5607,9 +4649,13 @@ function Documentation() {
             </Accordion>
             {/* Installation & Setup */}
             <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6" fontWeight="bold">
-                  📦 Installation & Setup
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#00ff88' }} />}>
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 700,
+                  fontFamily: 'Orbitron, monospace',
+                  color: '#00ff88'
+                }}>
+                  📦 QUANTUM SETUP
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -5621,7 +4667,7 @@ function Documentation() {
                   <ListItem>• Cloudinary account (for media storage)</ListItem>
                 </List>
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Backend Setup:</Typography>
-                <Card sx={{ mb: 2, background: 'rgba(255, 193, 7, 0.1)' }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>{`# Clone repository
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', color: '#00ff88' }}>{`# Clone repository
 git clone <repository-url>
 cd bonded/backend
 
@@ -5645,7 +4691,7 @@ python manage.py createsuperuser
 # Run development server
 python manage.py runserver`}</Typography></CardContent></Card>
                 <Typography variant="h6" gutterBottom>Frontend Setup:</Typography>
-                <Card sx={{ mb: 2, background: 'rgba(255, 193, 7, 0.1)' }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>{`# Navigate to frontend directory
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', color: '#00ff88' }}>{`# Navigate to frontend directory
 cd ../frontend
 
 # Install dependencies
@@ -5664,14 +4710,18 @@ npm start`}</Typography></CardContent></Card>
             </Accordion>
             {/* API Usage Examples */}
             <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6" fontWeight="bold">
-                  💡 API Usage Examples
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#00ff88' }} />}>
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 700,
+                  fontFamily: 'Orbitron, monospace',
+                  color: '#00ff88'
+                }}>
+                  💡 QUANTUM EXAMPLES
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <Typography variant="h6" gutterBottom>Authentication Flow:</Typography>
-                <Card sx={{ mb: 2, background: 'rgba(156, 39, 176, 0.1)' }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>{`// 1. Register a group
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', color: '#00ff88' }}>{`// 1. Register a group
 POST /api/users/register-group/
 {
   "group_name": "My Friends",
@@ -5689,7 +4739,7 @@ POST /api/users/group-login/
 // 3. Use JWT token in subsequent requests
 Authorization: Bearer <jwt_token>`}</Typography></CardContent></Card>
                 <Typography variant="h6" gutterBottom>Creating Content & Playing Games:</Typography>
-                <Card sx={{ mb: 2, background: 'rgba(156, 39, 176, 0.1)' }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace' }}>{`// Create a post
+                <Card sx={{ mb: 2, background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: 2 }}><CardContent><Typography variant="body2" component="pre" sx={{ fontFamily: 'monospace', color: '#00ff88' }}>{`// Create a post
 POST /api/posts/
 {
   "text": "Hello everyone!",
@@ -5727,25 +4777,33 @@ GET /api/games/word-association/?group=1
             </Accordion>
             {/* Troubleshooting */}
             <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6" fontWeight="bold">
-                  🔧 Troubleshooting
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#00ff88' }} />}>
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 700,
+                  fontFamily: 'Orbitron, monospace',
+                  color: '#00ff88'
+                }}>
+                  🔧 QUANTUM DEBUG
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <Typography variant="h6" gutterBottom>Common Issues:</Typography>
-                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="error">Database Connection Issues</Typography><Typography variant="body2">Ensure PostgreSQL is running and credentials in settings.py are correct.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="error">CORS Errors</Typography><Typography variant="body2">Check CORS_ALLOW_ALL_ORIGINS setting and ensure frontend URL is allowed.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="error">JWT Token Issues</Typography><Typography variant="body2">Verify JWT settings and ensure tokens are being sent in Authorization header.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="error">Media Upload Issues</Typography><Typography variant="body2">Configure Cloudinary settings properly for media storage functionality.</Typography></CardContent></Card>
-                <Card sx={{ mb: 2, background: 'rgba(244, 67, 54, 0.1)' }}><CardContent><Typography variant="subtitle1" fontWeight="bold" color="error">Game API Issues</Typography><Typography variant="body2">Ensure you are authenticated and passing the correct group ID for all game endpoints.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(255, 107, 107, 0.1)', border: '1px solid rgba(255, 107, 107, 0.3)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#ff6b6b', fontFamily: 'Orbitron, monospace' }}>Database Connection Issues</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Ensure PostgreSQL is running and credentials in settings.py are correct.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(255, 107, 107, 0.1)', border: '1px solid rgba(255, 107, 107, 0.3)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#ff6b6b', fontFamily: 'Orbitron, monospace' }}>CORS Errors</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Check CORS_ALLOW_ALL_ORIGINS setting and ensure frontend URL is allowed.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(255, 107, 107, 0.1)', border: '1px solid rgba(255, 107, 107, 0.3)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#ff6b6b', fontFamily: 'Orbitron, monospace' }}>JWT Token Issues</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Verify JWT settings and ensure tokens are being sent in Authorization header.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(255, 107, 107, 0.1)', border: '1px solid rgba(255, 107, 107, 0.3)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#ff6b6b', fontFamily: 'Orbitron, monospace' }}>Media Upload Issues</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Configure Cloudinary settings properly for media storage functionality.</Typography></CardContent></Card>
+                <Card sx={{ mb: 2, background: 'rgba(255, 107, 107, 0.1)', border: '1px solid rgba(255, 107, 107, 0.3)', borderRadius: 2 }}><CardContent><Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#ff6b6b', fontFamily: 'Orbitron, monospace' }}>Game API Issues</Typography><Typography variant="body2" sx={{ color: '#e0e0e0' }}>Ensure you are authenticated and passing the correct group ID for all game endpoints.</Typography></CardContent></Card>
               </AccordionDetails>
             </Accordion>
             {/* Future Enhancements */}
             <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6" fontWeight="bold">
-                  🚀 Future Enhancements
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#00ff88' }} />}>
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 700,
+                  fontFamily: 'Orbitron, monospace',
+                  color: '#00ff88'
+                }}>
+                  🚀 QUANTUM FUTURE
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -5764,13 +4822,33 @@ GET /api/games/word-association/?group=1
             </Accordion>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={handleClose} variant="contained" sx={{ 
-            background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: 2
-          }}>
-            Close
-          </Button>
+        <DialogActions sx={{ 
+          p: 2,
+          background: 'rgba(26, 26, 58, 0.3)',
+          borderTop: '1px solid rgba(0, 255, 136, 0.2)'
+        }}>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              onClick={handleClose} 
+              variant="contained" 
+              sx={{ 
+                background: 'linear-gradient(45deg, #00ff88 0%, #00cc6a 100%)',
+                color: '#0a0a1a',
+                fontWeight: 600,
+                fontFamily: 'Orbitron, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: 1,
+                borderRadius: 2,
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #00cc6a 0%, #00ff88 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 10px 25px rgba(0, 255, 136, 0.4)'
+                }
+              }}
+            >
+              QUANTUM CLOSE
+            </Button>
+          </motion.div>
         </DialogActions>
       </Dialog>
     </>
@@ -5779,86 +4857,139 @@ GET /api/games/word-association/?group=1
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <GroupProvider>
       <Router>
         <AuthGate />
         <CssBaseline />
-        <AppBar position="fixed" sx={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          zIndex: (theme) => theme.zIndex.drawer + 1
-        }}>
-          <Toolbar>
-            <Box display="flex" alignItems="center">
-              <BondedLogo 
-                size={40} 
-                src="/Bonded.png" // Your logo is now in the public folder
-              />
-              <Typography variant="h6" fontWeight="bold" sx={{ mr: 1, ml: 1 }}>
-                Bonded
-              </Typography>
-              <Typography variant="subtitle2" sx={{ opacity: 0.8 }}>
-                Social Platform
-              </Typography>
-            </Box>
-            <Box sx={{ flexGrow: 1 }} />
-            <Documentation />
-            {isAuthenticated && <LogoutButton />}
-          </Toolbar>
-        </AppBar>
-        {/* Spacer to prevent content from being hidden behind fixed header */}
-        <Toolbar />
-        <Container sx={{ mt: { xs: 2, md: 4 }, mb: { xs: 7, md: 8 }, minHeight: { xs: 'calc(100vh - 120px)', md: 'calc(100vh - 140px)' }, px: { xs: 1, sm: 2, md: 3 } }}>
-          {/* Removed <GroupSelector /> */}
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/change-credentials" element={<CredentialChange />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/posts" element={<Posts />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/games" element={<Games />} />
-          </Routes>
-        </Container>
-        {/* Fixed Footer */}
+        {/* Quantum Background Container */}
         <Box
-          component="footer"
           sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
-            color: 'white',
-            py: 1,
-            px: 2,
-            zIndex: (theme) => theme.zIndex.drawer + 1,
-            boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
-            borderTop: '1px solid rgba(255,255,255,0.1)'
+            minHeight: '100vh',
+            background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #2a2a4a 100%)',
+            position: 'relative',
+            overflow: 'hidden'
           }}
         >
-          <Container maxWidth="lg">
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: 1
-            }}>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Bonded Social Platform
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                © 2025 Aniruddha H D. All rights reserved.
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                Version 1.3.0
-              </Typography>
-            </Box>
-          </Container>
+          {/* Quantum Particles Background */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'radial-gradient(circle at 20% 80%, rgba(0, 255, 136, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(0, 136, 255, 0.05) 0%, transparent 50%)',
+              pointerEvents: 'none',
+              zIndex: 0
+            }}
+          />
+          
+          <AppBar position="fixed" sx={{ 
+            background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%)',
+            backdropFilter: 'blur(20px)',
+            borderBottom: '1px solid rgba(0, 255, 136, 0.2)',
+            boxShadow: '0 4px 20px rgba(0, 255, 136, 0.1)',
+            zIndex: (theme) => theme.zIndex.drawer + 1
+          }}>
+            <Toolbar>
+              <Box display="flex" alignItems="center">
+                <BondedLogo 
+                  size={40} 
+                  src="/Bonded.png"
+                />
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Typography variant="h6" fontWeight="bold" sx={{ mr: 1, ml: 1, color: '#00ff88' }}>
+                    BONDED
+                  </Typography>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <Typography variant="subtitle2" sx={{ opacity: 0.8, color: '#c0c0c0' }}>
+                    QUANTUM SOCIAL
+                  </Typography>
+                </motion.div>
+              </Box>
+              <Box sx={{ flexGrow: 1 }} />
+              <Documentation />
+              {isAuthenticated && <LogoutButton />}
+            </Toolbar>
+          </AppBar>
+          {/* Spacer to prevent content from being hidden behind fixed header */}
+          <Toolbar />
+          <Container sx={{ 
+            mt: { xs: 2, md: 4 }, 
+            mb: { xs: 7, md: 8 }, 
+            minHeight: { xs: 'calc(100vh - 120px)', md: 'calc(100vh - 140px)' }, 
+            px: { xs: 1, sm: 2, md: 3 },
+            position: 'relative',
+            zIndex: 1
+          }}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/change-credentials" element={<CredentialChange />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/posts" element={<Posts />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/games" element={<Games />} />
+            </Routes>
+            </Container>
+          
+          {/* Quantum Kitten - Only show on homepage */}
+          {window.location.pathname === '/' && (
+            <QuantumKitten isMobile={isMobile} />
+          )}
+          
+          {/* Fixed Footer */}
+          <Box
+            component="footer"
+            sx={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%)',
+              backdropFilter: 'blur(20px)',
+              color: '#c0c0c0',
+              py: 1,
+              px: 2,
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+              boxShadow: '0 -2px 10px rgba(0, 255, 136, 0.1)',
+              borderTop: '1px solid rgba(0, 255, 136, 0.2)'
+            }}
+          >
+            <Container maxWidth="lg">
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 1
+              }}>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  Bonded Social Platform
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                  © 2025 Aniruddha H D. All rights reserved.
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.7 }}>
+                  Version 1.4.0
+                </Typography>
+              </Box>
+            </Container>
+          </Box>
         </Box>
       </Router>
     </GroupProvider>
@@ -5874,3 +5005,106 @@ function App() {
 }
 
 export default App;
+
+// Add these placeholders:
+function Posts() {
+  return (
+    <Box sx={{ 
+      minHeight: '60vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      p: 4
+    }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Typography variant="h3" sx={{ 
+          color: '#00ff88', 
+          fontFamily: 'Orbitron, monospace',
+          fontWeight: 700,
+          mb: 2,
+          textShadow: '0 0 20px rgba(0, 255, 136, 0.5)'
+        }}>
+          QUANTUM POSTS
+        </Typography>
+        <Typography variant="h6" sx={{ 
+          color: '#c0c0c0', 
+          opacity: 0.8,
+          mb: 4
+        }}>
+          Coming Soon - Quantum Social Feed
+        </Typography>
+        <Box sx={{
+          background: 'rgba(26, 26, 58, 0.3)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(0, 255, 136, 0.2)',
+          borderRadius: 3,
+          p: 4,
+          maxWidth: 400,
+          boxShadow: '0 8px 32px rgba(0, 255, 136, 0.1)'
+        }}>
+          <Typography variant="body1" sx={{ color: '#e0e0e0' }}>
+            Advanced social feed with quantum-enhanced interactions, 
+            holographic posts, and real-time quantum entanglement features.
+          </Typography>
+        </Box>
+      </motion.div>
+    </Box>
+  );
+}
+
+function Events() {
+  return (
+    <Box sx={{ 
+      minHeight: '60vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      p: 4
+    }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
+        <Typography variant="h3" sx={{ 
+          color: '#8b5cf6', 
+          fontFamily: 'Orbitron, monospace',
+          fontWeight: 700,
+          mb: 2,
+          textShadow: '0 0 20px rgba(139, 92, 246, 0.5)'
+        }}>
+          QUANTUM EVENTS
+        </Typography>
+        <Typography variant="h6" sx={{ 
+          color: '#c0c0c0', 
+          opacity: 0.8,
+          mb: 4
+        }}>
+          Coming Soon - Temporal Event Management
+        </Typography>
+        <Box sx={{
+          background: 'rgba(26, 26, 58, 0.3)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(139, 92, 246, 0.2)',
+          borderRadius: 3,
+          p: 4,
+          maxWidth: 400,
+          boxShadow: '0 8px 32px rgba(139, 92, 246, 0.1)'
+        }}>
+          <Typography variant="body1" sx={{ color: '#e0e0e0' }}>
+            Quantum event scheduling with temporal coordinates, 
+            holographic event previews, and multi-dimensional RSVP systems.
+          </Typography>
+        </Box>
+      </motion.div>
+    </Box>
+  );
+}

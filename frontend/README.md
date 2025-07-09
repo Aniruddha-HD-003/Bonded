@@ -1,4 +1,4 @@
-# Bonded Frontend v1.1.0
+# Bonded Frontend v1.4.0
 
 A modern, responsive React frontend for the Bonded social platform - a private social networking application designed for groups of friends to share memories, plan events, and stay connected in a secure environment.
 
@@ -145,7 +145,7 @@ REACT_APP_API_URL=http://localhost:8000/api
 
 # Environment
 REACT_APP_ENVIRONMENT=development
-REACT_APP_VERSION=1.0.1
+REACT_APP_VERSION=1.4.0
 
 # Optional: Analytics
 REACT_APP_GA_TRACKING_ID=your-ga-tracking-id
@@ -323,4 +323,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Bonded Frontend v1.1.0** - Building stronger connections through private social spaces with rich media sharing.
+**Bonded Frontend v1.4.0** - Building stronger connections through private social spaces with rich media sharing.

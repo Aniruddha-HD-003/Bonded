@@ -1,101 +1,195 @@
 import React, { useState } from 'react';
-import { Box, Card, Typography, Button, TextField, CircularProgress } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Box, Card, Typography, Button, TextField, CircularProgress, CardContent, Alert } from '@mui/material';
+import { useNavigate, Navigate } from 'react-router-dom';
 import apiClient from '../config/api';
 import { useAuth } from '../contexts/AuthContext';
 
-const CredentialChange = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+function CredentialChange() {
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [error, setError] = useState<string | string[]>('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const pendingGroup = sessionStorage.getItem('pending_group') || '';
+  const pendingUsername = sessionStorage.getItem('pending_username') || '';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
     setLoading(true);
     try {
       await apiClient.post('/users/change-credentials/', {
-        username,
-        password,
+        group: pendingGroup,
+        username: pendingUsername,
+        new_username: newUsername,
+        new_password: newPassword,
       });
-      setSuccess('Credentials updated. Please log in again.');
-      logout();
-      navigate('/login');
+      setSuccess(true);
+      sessionStorage.removeItem('pending_group');
+      sessionStorage.removeItem('pending_username');
+      sessionStorage.removeItem('pending_password');
+      setTimeout(() => navigate('/login'), 1500);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Credential change failed.');
+      // Collect all error messages
+      const data = err.response?.data;
+      if (typeof data === 'string') {
+        setError(data);
+      } else if (data) {
+        const messages: string[] = [];
+        if (data.error) messages.push(data.error);
+        Object.entries(data).forEach(([field, value]) => {
+          if (Array.isArray(value)) {
+            value.forEach((msg: string) => messages.push(`${field}: ${msg}`));
+          }
+        });
+        setError(messages.length ? messages : 'Credential change failed.');
+      } else {
+        setError('Credential change failed.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  if (!pendingGroup || !pendingUsername) {
+    return <Navigate to="/login" />;
+  }
+
   return (
-    <Box mt={2}>
+    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
       <Card sx={{ 
-        maxWidth: 600, 
-        mx: 'auto', 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
+        maxWidth: 500, 
+        width: '100%',
+        background: 'rgba(26, 26, 58, 0.3)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(0, 255, 136, 0.2)',
         borderRadius: 4,
-        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+        boxShadow: '0 20px 40px rgba(0, 255, 136, 0.1)',
         overflow: 'hidden',
         position: 'relative'
       }}>
         <Box sx={{ 
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+          background: 'rgba(0, 255, 136, 0.1)',
           p: 4, 
           position: 'relative'
         }}>
-          {/* Back to Home Button */}
-          <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 1 }}>
-            <Button onClick={() => navigate('/dashboard')} sx={{ color: 'white', border: '1px solid rgba(255,255,255,0.3)', '&:hover': { background: 'rgba(255,255,255,0.1)' } }}>
-              ← Back to Dashboard
-            </Button>
-          </Box>
-          <Box sx={{ textAlign: 'center', ml: 8, mr: 2 }}>
-            <Typography variant="h4" gutterBottom fontWeight="bold">
-              🔑 Change Credentials
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ 
+              fontFamily: 'Orbitron, monospace',
+              fontWeight: 700,
+              color: '#ffffff',
+              mb: 2
+            }}>
+              🔐 Quantum Credentials
             </Typography>
-            <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
-              Update your username and password
+            <Typography variant="subtitle1" sx={{ 
+              opacity: 0.9,
+              color: '#c0c0c0',
+              fontFamily: 'Orbitron, monospace'
+            }}>
+              Set your quantum username & password
             </Typography>
-          </Box>
-          <Box mt={4}>
-            <form onSubmit={handleSubmit}>
-              <TextField
-                fullWidth
-                label="New Username"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                margin="normal"
-                required
-                sx={{ background: 'rgba(255,255,255,0.2)', borderRadius: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="New Password"
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                margin="normal"
-                required
-                sx={{ background: 'rgba(255,255,255,0.2)', borderRadius: 2 }}
-              />
-              {error && <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>}
-              {success && <Typography color="success.main" sx={{ mt: 2 }}>{success}</Typography>}
-              <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 3, borderRadius: 2, fontWeight: 'bold' }} disabled={loading}>
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Update Credentials'}
-              </Button>
-            </form>
           </Box>
         </Box>
+        <CardContent sx={{ p: 4 }}>
+          {success ? (
+            <Alert severity="success" sx={{ 
+              borderRadius: 2,
+              backgroundColor: 'rgba(0, 255, 136, 0.1)',
+              border: '1px solid rgba(0, 255, 136, 0.3)',
+              color: '#00ff88'
+            }}>
+              Quantum credentials updated! Redirecting to login...
+            </Alert>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <TextField
+                label="New Username"
+                value={newUsername}
+                onChange={e => setNewUsername(e.target.value)}
+                fullWidth
+                required
+                sx={{ 
+                  mb: 3,
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                    color: 'white',
+                    '& fieldset': { borderColor: 'rgba(0, 255, 136, 0.3)' },
+                    '&:hover fieldset': { borderColor: 'rgba(0, 255, 136, 0.5)' },
+                    '&.Mui-focused fieldset': { borderColor: '#00ff88' }
+                  },
+                  '& .MuiInputLabel-root': { color: 'rgba(0, 255, 136, 0.8)' },
+                  '& .MuiInputBase-input': { color: 'white' }
+                }}
+              />
+              <TextField
+                label="New Password"
+                type="password"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                fullWidth
+                required
+                sx={{ 
+                  mb: 3,
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                    color: 'white',
+                    '& fieldset': { borderColor: 'rgba(0, 255, 136, 0.3)' },
+                    '&:hover fieldset': { borderColor: 'rgba(0, 255, 136, 0.5)' },
+                    '&.Mui-focused fieldset': { borderColor: '#00ff88' }
+                  },
+                  '& .MuiInputLabel-root': { color: 'rgba(0, 255, 136, 0.8)' },
+                  '& .MuiInputBase-input': { color: 'white' }
+                }}
+              />
+              {error && (
+                Array.isArray(error) ? error.map((msg, idx) => (
+                  <Alert severity="error" sx={{ 
+                    mb: 1, 
+                    borderRadius: 2,
+                    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                    border: '1px solid rgba(244, 67, 54, 0.3)'
+                  }} key={idx}>{msg}</Alert>
+                )) : <Alert severity="error" sx={{ 
+                  mb: 3, 
+                  borderRadius: 2,
+                  backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                  border: '1px solid rgba(244, 67, 54, 0.3)'
+                }}>{error}</Alert>
+              )}
+              <Button 
+                type="submit" 
+                variant="contained" 
+                fullWidth 
+                size="large"
+                disabled={loading}
+                sx={{ 
+                  background: 'linear-gradient(45deg, #00ff88 0%, #00cc6a 100%)',
+                  color: '#0a0a1a',
+                  borderRadius: 3,
+                  py: 1.5,
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  fontFamily: 'Orbitron, monospace',
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                  boxShadow: '0 4px 15px rgba(0, 255, 136, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #00cc6a 0%, #00ff88 100%)',
+                    boxShadow: '0 6px 20px rgba(0, 255, 136, 0.4)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                {loading ? 'Updating Quantum Credentials...' : '🚀 Update Quantum Credentials'}
+              </Button>
+            </form>
+          )}
+        </CardContent>
       </Card>
     </Box>
   );
-};
+}
 
 export default CredentialChange; 
