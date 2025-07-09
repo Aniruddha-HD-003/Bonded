@@ -70,10 +70,22 @@ import {
   Psychology as PsychologyIcon,
   QuestionAnswer as QuestionAnswerIcon,
   CompareArrows as CompareArrowsIcon,
-  Create as CreateIcon
+  Create as CreateIcon,
+  Visibility as VisibilityIcon,
+  Person as PersonIcon,
+  Cloud as CloudIcon,
+  Speed as SpeedIcon,
+  Cake as CakeIcon,
+  Favorite as FavoriteIcon,
+  Celebration as CelebrationIcon,
+  VolunteerActivism as VolunteerActivismIcon
 } from '@mui/icons-material';
 import apiClient from './config/api';
 import BondedLogo from './components/BondedLogo';
+import BirthdayCelebrations from './components/BirthdayCelebrations';
+import AnniversaryCelebrations from './components/AnniversaryCelebrations';
+import HolidayGames from './components/HolidayGames';
+import RandomActsOfKindness from './components/RandomActsOfKindness';
 
 // Group context to provide memberships and selected group
 type Membership = {
@@ -1960,6 +1972,51 @@ function Games() {
   const [newFillInBlank, setNewFillInBlank] = useState({
     template: ''
   });
+  
+  // Engagement Games state
+  const [spotDifferenceGames, setSpotDifferenceGames] = useState<any[]>([]);
+  const [showCreateSpotDifference, setShowCreateSpotDifference] = useState(false);
+  const [newSpotDifference, setNewSpotDifference] = useState({
+    title: '',
+    description: '',
+    original_image: '',
+    modified_image: '',
+    difficulty: 'medium',
+    differences_count: 5,
+    time_limit: 60,
+    points_reward: 10
+  });
+  
+  const [guessWhoGames, setGuessWhoGames] = useState<any[]>([]);
+  const [showCreateGuessWho, setShowCreateGuessWho] = useState(false);
+  const [newGuessWho, setNewGuessWho] = useState({
+    title: '',
+    description: '',
+    mystery_image: '',
+    correct_answer: '',
+    hints: ['', '', ''],
+    time_limit: 120,
+    points_reward: 15
+  });
+  
+  const [wordCloudData, setWordCloudData] = useState<any>(null);
+  const [wordCloudPeriod, setWordCloudPeriod] = useState('daily');
+  const [wordCloudLoading, setWordCloudLoading] = useState(false);
+  
+  const [reactionRaceGames, setReactionRaceGames] = useState<any[]>([]);
+  const [showCreateReactionRace, setShowCreateReactionRace] = useState(false);
+  const [newReactionRace, setNewReactionRace] = useState({
+    title: '',
+    description: '',
+    target_post_id: '',
+    duration: 300,
+    points_reward: 20
+  });
+
+  // New: State placeholders for special events
+  const [anniversaryCelebrations, setAnniversaryCelebrations] = useState<any[]>([]);
+  const [holidayGames, setHolidayGames] = useState<any[]>([]);
+  const [randomActs, setRandomActs] = useState<any[]>([]);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -2017,10 +2074,46 @@ function Games() {
       .catch(() => setFillInBlankGames([]));
   }, [selectedGroup]);
 
+  const fetchEngagementGames = useCallback(() => {
+    if (!selectedGroup) return;
+    
+    // Fetch Spot the Difference games
+    apiClient.get(`/games/spot-difference/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setSpotDifferenceGames(res.data))
+      .catch(() => setSpotDifferenceGames([]));
+    
+    // Fetch Guess Who games
+    apiClient.get(`/games/guess-who/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setGuessWhoGames(res.data))
+      .catch(() => setGuessWhoGames([]));
+    
+    // Fetch Reaction Race games
+    apiClient.get(`/games/reaction-race/?group=${selectedGroup.group_id}`)
+      .then((res: any) => setReactionRaceGames(res.data))
+      .catch(() => setReactionRaceGames([]));
+  }, [selectedGroup]);
+
+  const fetchWordCloud = useCallback(async (period: string = 'daily') => {
+    if (!selectedGroup) return;
+    
+    setWordCloudLoading(true);
+    try {
+      const response = await apiClient.get(`/games/word-cloud/${selectedGroup.group_id}/?period=${period}`);
+      setWordCloudData(response.data);
+    } catch (err: any) {
+      console.error('Failed to fetch word cloud:', err);
+      setWordCloudData(null);
+    } finally {
+      setWordCloudLoading(false);
+    }
+  }, [selectedGroup]);
+
   useEffect(() => {
     fetchGamesData();
     fetchPolls();
     fetchSocialIcebreakers();
+    fetchEngagementGames();
+    fetchWordCloud(wordCloudPeriod);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup]);
 
@@ -2290,6 +2383,119 @@ function Games() {
     }
   };
 
+  const handleCreateSpotDifference = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form data
+    if (!newSpotDifference.title.trim() || !newSpotDifference.original_image.trim() || !newSpotDifference.modified_image.trim()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    const requestData = {
+      ...newSpotDifference,
+      group: selectedGroup.group_id
+    };
+    
+    try {
+      await apiClient.post('/games/spot-difference/', requestData);
+      setNewSpotDifference({
+        title: '',
+        description: '',
+        original_image: '',
+        modified_image: '',
+        difficulty: 'medium',
+        differences_count: 5,
+        time_limit: 60,
+        points_reward: 10
+      });
+      setShowCreateSpotDifference(false);
+      fetchEngagementGames();
+    } catch (err: any) {
+      console.error('Failed to create Spot the Difference game:', err);
+      if (err.response?.data) {
+        console.error('Error details:', err.response.data);
+        alert('Failed to create game: ' + JSON.stringify(err.response.data));
+      } else {
+        alert('Failed to create game. Please try again.');
+      }
+    }
+  };
+
+  const handleCreateGuessWho = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form data
+    if (!newGuessWho.title.trim() || !newGuessWho.mystery_image.trim() || !newGuessWho.correct_answer.trim()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    const requestData = {
+      ...newGuessWho,
+      group: selectedGroup.group_id
+    };
+    
+    try {
+      await apiClient.post('/games/guess-who/', requestData);
+      setNewGuessWho({
+        title: '',
+        description: '',
+        mystery_image: '',
+        correct_answer: '',
+        hints: ['', '', ''],
+        time_limit: 120,
+        points_reward: 15
+      });
+      setShowCreateGuessWho(false);
+      fetchEngagementGames();
+    } catch (err: any) {
+      console.error('Failed to create Guess Who game:', err);
+      if (err.response?.data) {
+        console.error('Error details:', err.response.data);
+        alert('Failed to create game: ' + JSON.stringify(err.response.data));
+      } else {
+        alert('Failed to create game. Please try again.');
+      }
+    }
+  };
+
+  const handleCreateReactionRace = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form data
+    if (!newReactionRace.title.trim() || !newReactionRace.target_post_id.trim()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    const requestData = {
+      ...newReactionRace,
+      group: selectedGroup.group_id
+    };
+    
+    try {
+      await apiClient.post('/games/reaction-race/', requestData);
+      setNewReactionRace({
+        title: '',
+        description: '',
+        target_post_id: '',
+        duration: 300,
+        points_reward: 20
+      });
+      setShowCreateReactionRace(false);
+      fetchEngagementGames();
+    } catch (err: any) {
+      console.error('Failed to create Reaction Race game:', err);
+      if (err.response?.data) {
+        console.error('Error details:', err.response.data);
+        alert('Failed to create game: ' + JSON.stringify(err.response.data));
+      } else {
+        alert('Failed to create game. Please try again.');
+      }
+    }
+  };
+
   if (!selectedGroup) {
     return (
       <Card sx={{ 
@@ -2404,9 +2610,17 @@ function Games() {
             <Tab icon={<QuestionAnswerIcon />} label="Would You Rather" iconPosition="start" />
             <Tab icon={<CompareArrowsIcon />} label="This or That" iconPosition="start" />
             <Tab icon={<CreateIcon />} label="Fill in Blank" iconPosition="start" />
+            <Tab icon={<VisibilityIcon />} label="Spot Difference" iconPosition="start" />
+            <Tab icon={<PersonIcon />} label="Guess Who" iconPosition="start" />
+            <Tab icon={<CloudIcon />} label="Word Cloud" iconPosition="start" />
+            <Tab icon={<SpeedIcon />} label="Reaction Race" iconPosition="start" />
+            <Tab icon={<CakeIcon />} label="Birthdays" iconPosition="start" />
+            <Tab icon={<CelebrationIcon />} label="Anniversaries" iconPosition="start" />
+            <Tab icon={<FavoriteIcon />} label="Holiday Games" iconPosition="start" />
+            <Tab icon={<VolunteerActivismIcon />} label="Kindness" iconPosition="start" />
           </Tabs>
           <Box sx={{ textAlign: 'center', py: 1, color: 'text.secondary', fontSize: { xs: '0.7rem', sm: '0.8rem' } }}>
-            ← Scroll to see all game types →
+            ← Scroll to see all game types & events →
           </Box>
         </Box>
 
@@ -2933,6 +3147,246 @@ function Games() {
               )}
             </Box>
           )}
+
+          {/* Spot the Difference Tab */}
+          {activeTab === 10 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight="bold">Spot the Difference</Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCreateSpotDifference(true)}
+                  sx={{
+                    background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: 2
+                  }}
+                >
+                  Create Game
+                </Button>
+              </Box>
+              
+              {spotDifferenceGames.length === 0 ? (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <VisibilityIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No games yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Create the first Spot the Difference game!
+                  </Typography>
+                </Card>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {spotDifferenceGames.map((game) => (
+                    <SpotDifferenceGame key={game.id} game={game} onRefresh={fetchEngagementGames} />
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* Guess Who Tab */}
+          {activeTab === 11 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight="bold">Guess Who</Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCreateGuessWho(true)}
+                  sx={{
+                    background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: 2
+                  }}
+                >
+                  Create Game
+                </Button>
+              </Box>
+              
+              {guessWhoGames.length === 0 ? (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <PersonIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No games yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Create the first Guess Who game!
+                  </Typography>
+                </Card>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {guessWhoGames.map((game) => (
+                    <GuessWhoGame key={game.id} game={game} onRefresh={fetchEngagementGames} />
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* Word Cloud Tab */}
+          {activeTab === 12 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight="bold">Word Cloud</Typography>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                  <TextField
+                    select
+                    size="small"
+                    label="Period"
+                    value={wordCloudPeriod}
+                    onChange={(e) => {
+                      setWordCloudPeriod(e.target.value);
+                      fetchWordCloud(e.target.value);
+                    }}
+                    sx={{ minWidth: 120 }}
+                  >
+                    <MenuItem value="daily">Daily</MenuItem>
+                    <MenuItem value="weekly">Weekly</MenuItem>
+                    <MenuItem value="monthly">Monthly</MenuItem>
+                  </TextField>
+                  <Button
+                    variant="outlined"
+                    onClick={() => fetchWordCloud(wordCloudPeriod)}
+                    disabled={wordCloudLoading}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    Refresh
+                  </Button>
+                </Box>
+              </Box>
+              
+              {wordCloudLoading ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <CircularProgress />
+                  <Typography variant="body2" color="text.secondary" mt={2}>
+                    Generating word cloud...
+                  </Typography>
+                </Box>
+              ) : wordCloudData ? (
+                <Card sx={{ borderRadius: 2, border: '1px solid #e0e0e0' }}>
+                  <CardContent>
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>
+                      Most Used Words ({wordCloudPeriod})
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" mb={2}>
+                      Based on {wordCloudData.total_posts} posts from your group
+                    </Typography>
+                    
+                    <Box sx={{ 
+                      display: 'flex', 
+                      flexWrap: 'wrap', 
+                      gap: 1, 
+                      p: 2, 
+                      backgroundColor: 'rgba(0,0,0,0.02)', 
+                      borderRadius: 2,
+                      minHeight: 200,
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {wordCloudData.word_data && Object.entries(wordCloudData.word_data).map(([word, count]: [string, any]) => (
+                        <Chip
+                          key={word}
+                          label={`${word} (${count})`}
+                          size="small"
+                          sx={{
+                            fontSize: Math.min(12 + (count * 2), 24),
+                            fontWeight: 'bold',
+                            backgroundColor: `hsl(${Math.random() * 360}, 70%, 80%)`,
+                            color: 'text.primary',
+                            '&:hover': {
+                              transform: 'scale(1.1)',
+                              transition: 'transform 0.2s'
+                            }
+                          }}
+                        />
+                      ))}
+                    </Box>
+                    
+                    <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Total words: {wordCloudData.total_words}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Unique words: {wordCloudData.unique_words}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Period: {wordCloudPeriod}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <CloudIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No word data available
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Start posting in your group to generate a word cloud!
+                  </Typography>
+                </Card>
+              )}
+            </Box>
+          )}
+
+          {/* Reaction Race Tab */}
+          {activeTab === 13 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h6" fontWeight="bold">Reaction Race</Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCreateReactionRace(true)}
+                  sx={{
+                    background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: 2
+                  }}
+                >
+                  Create Race
+                </Button>
+              </Box>
+              
+              {reactionRaceGames.length === 0 ? (
+                <Card sx={{ p: 3, textAlign: 'center', background: 'rgba(0,0,0,0.02)' }}>
+                  <SpeedIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No races yet
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Create the first Reaction Race!
+                  </Typography>
+                </Card>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {reactionRaceGames.map((game) => (
+                    <ReactionRaceGame key={game.id} game={game} onRefresh={fetchEngagementGames} />
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* Birthday Celebrations Tab */}
+          {activeTab === 14 && (
+            <BirthdayCelebrations groupId={selectedGroup.group_id} />
+          )}
+
+          {/* Anniversary Celebrations Tab */}
+          {activeTab === 15 && (
+            <AnniversaryCelebrations groupId={selectedGroup.group_id} />
+          )}
+
+          {/* Holiday Games Tab */}
+          {activeTab === 16 && (
+            <HolidayGames groupId={selectedGroup.group_id} />
+          )}
+
+          {/* Random Acts of Kindness Tab */}
+          {activeTab === 17 && (
+            <RandomActsOfKindness groupId={selectedGroup.group_id} />
+          )}
         </Box>
       </Card>
 
@@ -3287,6 +3741,297 @@ function Games() {
               borderRadius: 2
             }}>
               Create Game
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Create Spot the Difference Dialog */}
+      <Dialog 
+        open={showCreateSpotDifference} 
+        onClose={() => setShowCreateSpotDifference(false)}
+        maxWidth="md"
+        fullWidth
+        fullScreen={isMobile}
+      >
+        <DialogTitle>
+          <Typography variant="h6" fontWeight="bold">Create Spot the Difference Game</Typography>
+        </DialogTitle>
+        <form onSubmit={handleCreateSpotDifference}>
+          <DialogContent sx={{ p: { xs: 1, sm: 2 } }}>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Create a spot the difference game by providing two images - original and modified versions.
+            </Typography>
+            <TextField
+              fullWidth
+              label="Game Title"
+              value={newSpotDifference.title}
+              onChange={(e) => setNewSpotDifference({...newSpotDifference, title: e.target.value})}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={newSpotDifference.description}
+              onChange={(e) => setNewSpotDifference({...newSpotDifference, description: e.target.value})}
+              margin="normal"
+              multiline
+              rows={2}
+            />
+            <TextField
+              fullWidth
+              label="Original Image URL"
+              value={newSpotDifference.original_image}
+              onChange={(e) => setNewSpotDifference({...newSpotDifference, original_image: e.target.value})}
+              margin="normal"
+              required
+              placeholder="https://example.com/original.jpg"
+            />
+            <TextField
+              fullWidth
+              label="Modified Image URL"
+              value={newSpotDifference.modified_image}
+              onChange={(e) => setNewSpotDifference({...newSpotDifference, modified_image: e.target.value})}
+              margin="normal"
+              required
+              placeholder="https://example.com/modified.jpg"
+            />
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+              <TextField
+                select
+                fullWidth
+                label="Difficulty"
+                value={newSpotDifference.difficulty}
+                onChange={(e) => setNewSpotDifference({...newSpotDifference, difficulty: e.target.value})}
+                margin="normal"
+                required
+              >
+                <MenuItem value="easy">Easy</MenuItem>
+                <MenuItem value="medium">Medium</MenuItem>
+                <MenuItem value="hard">Hard</MenuItem>
+              </TextField>
+              <TextField
+                type="number"
+                fullWidth
+                label="Number of Differences"
+                value={newSpotDifference.differences_count}
+                onChange={(e) => setNewSpotDifference({...newSpotDifference, differences_count: parseInt(e.target.value) || 5})}
+                margin="normal"
+                required
+                inputProps={{ min: 1, max: 20 }}
+              />
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+              <TextField
+                type="number"
+                fullWidth
+                label="Time Limit (seconds)"
+                value={newSpotDifference.time_limit}
+                onChange={(e) => setNewSpotDifference({...newSpotDifference, time_limit: parseInt(e.target.value) || 60})}
+                margin="normal"
+                required
+                inputProps={{ min: 30, max: 300 }}
+              />
+              <TextField
+                type="number"
+                fullWidth
+                label="Points Reward"
+                value={newSpotDifference.points_reward}
+                onChange={(e) => setNewSpotDifference({...newSpotDifference, points_reward: parseInt(e.target.value) || 10})}
+                margin="normal"
+                required
+                inputProps={{ min: 1, max: 100 }}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: { xs: 1, sm: 2 } }}>
+            <Button onClick={() => setShowCreateSpotDifference(false)}>Cancel</Button>
+            <Button type="submit" variant="contained" sx={{
+              background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: 2
+            }}>
+              Create Game
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Create Guess Who Dialog */}
+      <Dialog 
+        open={showCreateGuessWho} 
+        onClose={() => setShowCreateGuessWho(false)}
+        maxWidth="md"
+        fullWidth
+        fullScreen={isMobile}
+      >
+        <DialogTitle>
+          <Typography variant="h6" fontWeight="bold">Create Guess Who Game</Typography>
+        </DialogTitle>
+        <form onSubmit={handleCreateGuessWho}>
+          <DialogContent sx={{ p: { xs: 1, sm: 2 } }}>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Create a Guess Who game by uploading a mystery photo and providing hints for others to guess who it is.
+            </Typography>
+            <TextField
+              fullWidth
+              label="Game Title"
+              value={newGuessWho.title}
+              onChange={(e) => setNewGuessWho({...newGuessWho, title: e.target.value})}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={newGuessWho.description}
+              onChange={(e) => setNewGuessWho({...newGuessWho, description: e.target.value})}
+              margin="normal"
+              multiline
+              rows={2}
+            />
+            <TextField
+              fullWidth
+              label="Mystery Image URL"
+              value={newGuessWho.mystery_image}
+              onChange={(e) => setNewGuessWho({...newGuessWho, mystery_image: e.target.value})}
+              margin="normal"
+              required
+              placeholder="https://example.com/mystery.jpg"
+            />
+            <TextField
+              fullWidth
+              label="Correct Answer"
+              value={newGuessWho.correct_answer}
+              onChange={(e) => setNewGuessWho({...newGuessWho, correct_answer: e.target.value})}
+              margin="normal"
+              required
+              placeholder="e.g., John Smith"
+            />
+            <Typography variant="subtitle2" fontWeight="bold" mt={2} mb={1}>Hints (optional):</Typography>
+            {newGuessWho.hints.map((hint: string, index: number) => (
+              <TextField
+                key={index}
+                fullWidth
+                label={`Hint ${index + 1}`}
+                value={hint}
+                onChange={(e) => {
+                  const newHints = [...newGuessWho.hints];
+                  newHints[index] = e.target.value;
+                  setNewGuessWho({...newGuessWho, hints: newHints});
+                }}
+                margin="normal"
+                placeholder={`Hint ${index + 1} (optional)`}
+              />
+            ))}
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+              <TextField
+                type="number"
+                fullWidth
+                label="Time Limit (seconds)"
+                value={newGuessWho.time_limit}
+                onChange={(e) => setNewGuessWho({...newGuessWho, time_limit: parseInt(e.target.value) || 120})}
+                margin="normal"
+                required
+                inputProps={{ min: 30, max: 600 }}
+              />
+              <TextField
+                type="number"
+                fullWidth
+                label="Points Reward"
+                value={newGuessWho.points_reward}
+                onChange={(e) => setNewGuessWho({...newGuessWho, points_reward: parseInt(e.target.value) || 15})}
+                margin="normal"
+                required
+                inputProps={{ min: 1, max: 100 }}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: { xs: 1, sm: 2 } }}>
+            <Button onClick={() => setShowCreateGuessWho(false)}>Cancel</Button>
+            <Button type="submit" variant="contained" sx={{
+              background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: 2
+            }}>
+              Create Game
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Create Reaction Race Dialog */}
+      <Dialog 
+        open={showCreateReactionRace} 
+        onClose={() => setShowCreateReactionRace(false)}
+        maxWidth="sm"
+        fullWidth
+        fullScreen={isMobile}
+      >
+        <DialogTitle>
+          <Typography variant="h6" fontWeight="bold">Create Reaction Race</Typography>
+        </DialogTitle>
+        <form onSubmit={handleCreateReactionRace}>
+          <DialogContent sx={{ p: { xs: 1, sm: 2 } }}>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Create a reaction race where members compete to be the first to react to a specific post.
+            </Typography>
+            <TextField
+              fullWidth
+              label="Race Title"
+              value={newReactionRace.title}
+              onChange={(e) => setNewReactionRace({...newReactionRace, title: e.target.value})}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={newReactionRace.description}
+              onChange={(e) => setNewReactionRace({...newReactionRace, description: e.target.value})}
+              margin="normal"
+              multiline
+              rows={2}
+            />
+            <TextField
+              fullWidth
+              label="Target Post ID"
+              value={newReactionRace.target_post_id}
+              onChange={(e) => setNewReactionRace({...newReactionRace, target_post_id: e.target.value})}
+              margin="normal"
+              required
+              placeholder="Enter the post ID to react to"
+              type="number"
+            />
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+              <TextField
+                type="number"
+                fullWidth
+                label="Duration (seconds)"
+                value={newReactionRace.duration}
+                onChange={(e) => setNewReactionRace({...newReactionRace, duration: parseInt(e.target.value) || 300})}
+                margin="normal"
+                required
+                inputProps={{ min: 60, max: 3600 }}
+              />
+              <TextField
+                type="number"
+                fullWidth
+                label="Points Reward"
+                value={newReactionRace.points_reward}
+                onChange={(e) => setNewReactionRace({...newReactionRace, points_reward: parseInt(e.target.value) || 20})}
+                margin="normal"
+                required
+                inputProps={{ min: 1, max: 100 }}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: { xs: 1, sm: 2 } }}>
+            <Button onClick={() => setShowCreateReactionRace(false)}>Cancel</Button>
+            <Button type="submit" variant="contained" sx={{
+              background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: 2
+            }}>
+              Create Race
             </Button>
           </DialogActions>
         </form>
@@ -4019,6 +4764,592 @@ function FillInBlankGame({ game, onRefresh }: { game: any, onRefresh: () => void
   );
 }
 
+function SpotDifferenceGame({ game, onRefresh }: { game: any, onRefresh: () => void }) {
+  const [differencesFound, setDifferencesFound] = useState(0);
+  const [timeTaken, setTimeTaken] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [gameCompleted, setGameCompleted] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [showGame, setShowGame] = useState(false);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (gameStarted && !gameCompleted && timer < game.time_limit) {
+      interval = setInterval(() => {
+        setTimer(prev => prev + 1);
+        setTimeTaken(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [gameStarted, gameCompleted, timer, game.time_limit]);
+
+  const handleStartGame = () => {
+    setGameStarted(true);
+    setShowGame(true);
+    setTimer(0);
+    setTimeTaken(0);
+    setDifferencesFound(0);
+  };
+
+  const handleSubmitAttempt = async () => {
+    if (differencesFound < 0 || differencesFound > game.differences_count) {
+      alert('Please enter a valid number of differences found');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await apiClient.post(`/games/spot-difference/${game.id}/attempt/`, {
+        differences_found: differencesFound,
+        time_taken: timeTaken
+      });
+      
+      setGameCompleted(true);
+      onRefresh();
+      
+      // Show results
+      const result = response.data;
+      alert(`Game completed!\nScore: ${result.score}\nDifferences found: ${differencesFound}/${game.differences_count}\nTime taken: ${timeTaken}s\nPoints earned: ${result.points_earned}`);
+      
+    } catch (err: any) {
+      console.error('Failed to submit attempt:', err);
+      alert('Failed to submit attempt. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setGameStarted(false);
+    setGameCompleted(false);
+    setShowGame(false);
+    setTimer(0);
+    setTimeTaken(0);
+    setDifferencesFound(0);
+  };
+
+  return (
+    <Card sx={{ borderRadius: 2, border: '1px solid #e0e0e0' }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+          <Box>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              {game.title}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {game.description}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Created by {game.created_by_username}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+              <Chip label={`${game.differences_count} differences`} size="small" variant="outlined" />
+              <Chip label={`${game.time_limit}s limit`} size="small" variant="outlined" />
+              <Chip label={`${game.points_reward} pts`} size="small" color="primary" />
+              <Chip label={game.difficulty} size="small" variant="outlined" />
+            </Box>
+          </Box>
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography variant="body2" color="text.secondary">
+              {game.attempt_count} attempts
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Avg score: {game.average_score}
+            </Typography>
+          </Box>
+        </Box>
+
+        {!game.has_attempted && !showGame && (
+          <Button
+            variant="contained"
+            onClick={handleStartGame}
+            sx={{ background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)', borderRadius: 2 }}
+          >
+            Start Game
+          </Button>
+        )}
+
+        {showGame && !gameCompleted && (
+          <Box sx={{ mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h6">Time: {timer}s / {game.time_limit}s</Typography>
+              <Typography variant="h6">Differences: {differencesFound} / {game.differences_count}</Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+              <img 
+                src={game.original_image} 
+                alt="Original" 
+                style={{ width: '45%', height: 'auto', border: '2px solid #ccc' }}
+              />
+              <img 
+                src={game.modified_image} 
+                alt="Modified" 
+                style={{ width: '45%', height: 'auto', border: '2px solid #ccc' }}
+              />
+            </Box>
+            
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <TextField
+                type="number"
+                label="Differences found"
+                value={differencesFound}
+                onChange={(e) => setDifferencesFound(parseInt(e.target.value) || 0)}
+                inputProps={{ min: 0, max: game.differences_count }}
+                sx={{ width: 150 }}
+              />
+              <Button
+                variant="contained"
+                onClick={handleSubmitAttempt}
+                disabled={loading}
+                sx={{ background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)', borderRadius: 2 }}
+              >
+                {loading ? 'Submitting...' : 'Submit'}
+              </Button>
+            </Box>
+          </Box>
+        )}
+
+        {game.has_attempted && !showGame && (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            You already attempted this game. Score: {game.user_attempt?.score || 0}
+          </Alert>
+        )}
+
+        {gameCompleted && (
+          <Box sx={{ mt: 2 }}>
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Game completed! You can play again if you want.
+            </Alert>
+            <Button
+              variant="outlined"
+              onClick={handleReset}
+              sx={{ borderRadius: 2 }}
+            >
+              Play Again
+            </Button>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function GuessWhoGame({ game, onRefresh }: { game: any, onRefresh: () => void }) {
+  const [guess, setGuess] = useState('');
+  const [timeTaken, setTimeTaken] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [gameCompleted, setGameCompleted] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [showGame, setShowGame] = useState(false);
+  const [showHints, setShowHints] = useState(false);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (gameStarted && !gameCompleted && timer < game.time_limit) {
+      interval = setInterval(() => {
+        setTimer(prev => prev + 1);
+        setTimeTaken(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [gameStarted, gameCompleted, timer, game.time_limit]);
+
+  const handleStartGame = () => {
+    setGameStarted(true);
+    setShowGame(true);
+    setTimer(0);
+    setTimeTaken(0);
+    setGuess('');
+  };
+
+  const handleSubmitGuess = async () => {
+    if (!guess.trim()) {
+      alert('Please enter your guess');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await apiClient.post(`/games/guess-who/${game.id}/attempt/`, {
+        guess: guess.trim(),
+        time_taken: timeTaken
+      });
+      
+      setGameCompleted(true);
+      onRefresh();
+      
+      // Show results
+      const result = response.data;
+      const isCorrect = result.is_correct;
+      alert(`Game completed!\nYour guess: ${guess}\nCorrect answer: ${game.correct_answer}\nResult: ${isCorrect ? 'Correct!' : 'Incorrect'}\nScore: ${result.score}\nTime taken: ${timeTaken}s\nPoints earned: ${result.points_earned}`);
+      
+    } catch (err: any) {
+      console.error('Failed to submit guess:', err);
+      alert('Failed to submit guess. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setGameStarted(false);
+    setGameCompleted(false);
+    setShowGame(false);
+    setTimer(0);
+    setTimeTaken(0);
+    setGuess('');
+    setShowHints(false);
+  };
+
+  return (
+    <Card sx={{ borderRadius: 2, border: '1px solid #e0e0e0' }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+          <Box>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              {game.title}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {game.description}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Created by {game.created_by_username}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+              <Chip label={`${game.time_limit}s limit`} size="small" variant="outlined" />
+              <Chip label={`${game.points_reward} pts`} size="small" color="primary" />
+              <Chip label={`${game.hints.length} hints`} size="small" variant="outlined" />
+            </Box>
+          </Box>
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography variant="body2" color="text.secondary">
+              {game.attempt_count} attempts
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Success rate: {game.success_rate}%
+            </Typography>
+          </Box>
+        </Box>
+
+        {!game.has_attempted && !showGame && (
+          <Button
+            variant="contained"
+            onClick={handleStartGame}
+            sx={{ background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)', borderRadius: 2 }}
+          >
+            Start Game
+          </Button>
+        )}
+
+        {showGame && !gameCompleted && (
+          <Box sx={{ mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h6">Time: {timer}s / {game.time_limit}s</Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => setShowHints(!showHints)}
+                sx={{ borderRadius: 2 }}
+              >
+                {showHints ? 'Hide Hints' : 'Show Hints'}
+              </Button>
+            </Box>
+            
+            <Box sx={{ textAlign: 'center', mb: 2 }}>
+              <img 
+                src={game.mystery_image} 
+                alt="Mystery Person" 
+                style={{ 
+                  maxWidth: '100%', 
+                  maxHeight: '300px', 
+                  border: '2px solid #ccc',
+                  borderRadius: '8px'
+                }}
+              />
+            </Box>
+            
+            {showHints && (
+              <Box sx={{ mb: 2, p: 2, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 2 }}>
+                <Typography variant="subtitle2" fontWeight="bold" mb={1}>Hints:</Typography>
+                {game.hints.map((hint: string, index: number) => (
+                  <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
+                    {index + 1}. {hint}
+                  </Typography>
+                ))}
+              </Box>
+            )}
+            
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <TextField
+                fullWidth
+                label="Who is this person?"
+                value={guess}
+                onChange={(e) => setGuess(e.target.value)}
+                placeholder="Enter your guess..."
+                sx={{ flexGrow: 1 }}
+              />
+              <Button
+                variant="contained"
+                onClick={handleSubmitGuess}
+                disabled={loading || !guess.trim()}
+                sx={{ background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)', borderRadius: 2 }}
+              >
+                {loading ? 'Submitting...' : 'Submit Guess'}
+              </Button>
+            </Box>
+          </Box>
+        )}
+
+        {game.has_attempted && !showGame && (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            You already attempted this game. Your guess: "{game.user_attempt?.guess}" - {game.user_attempt?.is_correct ? 'Correct!' : 'Incorrect'}
+          </Alert>
+        )}
+
+        {gameCompleted && (
+          <Box sx={{ mt: 2 }}>
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Game completed! You can play again if you want.
+            </Alert>
+            <Button
+              variant="outlined"
+              onClick={handleReset}
+              sx={{ borderRadius: 2 }}
+            >
+              Play Again
+            </Button>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ReactionRaceGame({ game, onRefresh }: { game: any, onRefresh: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [hasJoined, setHasJoined] = useState(false);
+  const [timeJoined, setTimeJoined] = useState<number | null>(null);
+  const [reactionTime, setReactionTime] = useState<number | null>(null);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+
+  const handleJoinRace = async () => {
+    setLoading(true);
+    try {
+      await apiClient.post(`/games/reaction-race/${game.id}/join/`);
+      setHasJoined(true);
+      setTimeJoined(Date.now());
+      onRefresh();
+    } catch (err: any) {
+      console.error('Failed to join race:', err);
+      alert('Failed to join race. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReact = async (reactionType: string) => {
+    if (!hasJoined) return;
+    
+    setLoading(true);
+    try {
+      const response = await apiClient.post(`/games/reaction-race/${game.id}/react/`, {
+        reaction_type: reactionType,
+        reaction_time: Date.now() - (timeJoined || 0)
+      });
+      
+      setReactionTime(response.data.reaction_time);
+      onRefresh();
+      
+      // Show results
+      const result = response.data;
+      alert(`Reaction submitted!\nReaction time: ${result.reaction_time}ms\nPosition: ${result.position}\nPoints earned: ${result.points_earned}`);
+      
+    } catch (err: any) {
+      console.error('Failed to submit reaction:', err);
+      alert('Failed to submit reaction. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewLeaderboard = async () => {
+    try {
+      const response = await apiClient.get(`/games/reaction-race/${game.id}/leaderboard/`);
+      setLeaderboard(response.data);
+      setShowLeaderboard(true);
+    } catch (err: any) {
+      console.error('Failed to fetch leaderboard:', err);
+      alert('Failed to fetch leaderboard.');
+    }
+  };
+
+  const formatTime = (ms: number) => {
+    return `${ms}ms`;
+  };
+
+  return (
+    <Card sx={{ borderRadius: 2, border: '1px solid #e0e0e0' }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+          <Box>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              {game.title}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {game.description}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Created by {game.created_by_username}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+              <Chip label={`${game.duration}s duration`} size="small" variant="outlined" />
+              <Chip label={`${game.points_reward} pts`} size="small" color="primary" />
+              <Chip label={`${game.participant_count} participants`} size="small" variant="outlined" />
+            </Box>
+          </Box>
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography variant="body2" color="text.secondary">
+              Target Post: #{game.target_post_id}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Status: {game.is_active ? 'Active' : 'Ended'}
+            </Typography>
+          </Box>
+        </Box>
+
+        {!hasJoined && game.is_active && (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Be the first to react to the target post! Join the race and get ready to react quickly.
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={handleJoinRace}
+              disabled={loading}
+              sx={{ background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)', borderRadius: 2 }}
+            >
+              {loading ? 'Joining...' : 'Join Race'}
+            </Button>
+          </Box>
+        )}
+
+        {hasJoined && game.is_active && !reactionTime && (
+          <Box sx={{ mt: 2 }}>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              You're in the race! React to the target post as quickly as possible.
+            </Alert>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Target Post: #{game.target_post_id}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <Button
+                variant="contained"
+                onClick={() => handleReact('like')}
+                disabled={loading}
+                sx={{ background: 'linear-gradient(45deg, #4caf50 0%, #45a049 100%)', borderRadius: 2 }}
+              >
+                👍 Like
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleReact('love')}
+                disabled={loading}
+                sx={{ background: 'linear-gradient(45deg, #f44336 0%, #d32f2f 100%)', borderRadius: 2 }}
+              >
+                ❤️ Love
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleReact('laugh')}
+                disabled={loading}
+                sx={{ background: 'linear-gradient(45deg, #ff9800 0%, #f57c00 100%)', borderRadius: 2 }}
+              >
+                😂 Laugh
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleReact('wow')}
+                disabled={loading}
+                sx={{ background: 'linear-gradient(45deg, #9c27b0 0%, #7b1fa2 100%)', borderRadius: 2 }}
+              >
+                😮 Wow
+              </Button>
+            </Box>
+          </Box>
+        )}
+
+        {reactionTime && (
+          <Alert severity="success" sx={{ mt: 2 }}>
+            Reaction submitted! Your time: {formatTime(reactionTime)}
+          </Alert>
+        )}
+
+        {!game.is_active && (
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            This race has ended. Check the leaderboard for results!
+          </Alert>
+        )}
+
+        <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+          <Button
+            variant="outlined"
+            onClick={handleViewLeaderboard}
+            sx={{ borderRadius: 2 }}
+          >
+            View Leaderboard
+          </Button>
+        </Box>
+
+        {/* Leaderboard Dialog */}
+        <Dialog open={showLeaderboard} onClose={() => setShowLeaderboard(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Reaction Race Leaderboard</DialogTitle>
+          <DialogContent>
+            {leaderboard.length === 0 ? (
+              <Typography color="text.secondary">No participants yet.</Typography>
+            ) : (
+              <List>
+                {leaderboard.map((participant, index) => (
+                  <ListItem key={participant.id} divider>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="h6" color="primary">
+                            #{index + 1}
+                          </Typography>
+                          <Typography variant="body1" fontWeight="bold">
+                            {participant.username}
+                          </Typography>
+                        </Box>
+                      }
+                      secondary={
+                        <Box>
+                          <Typography variant="body2">
+                            Reaction: {participant.reaction_type} • Time: {formatTime(participant.reaction_time)}
+                          </Typography>
+                          <Typography variant="body2" color="primary">
+                            Points: {participant.points_earned}
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowLeaderboard(false)}>Close</Button>
+          </DialogActions>
+        </Dialog>
+      </CardContent>
+    </Card>
+  );
+}
+
 function LogoutButton() {
   const navigate = useNavigate();
   const { setMemberships, setSelectedGroup } = useGroup();
@@ -4103,7 +5434,7 @@ function Documentation() {
           gap: 1
         }}>
           <CodeIcon />
-          Bonded Social Platform - Complete Documentation (v1.2.0)
+          Bonded Social Platform - Complete Documentation (v1.3.0)
         </DialogTitle>
         <DialogContent sx={{ p: { xs: 1, sm: 3 } }}>
           <Box sx={{ maxHeight: '70vh', overflow: 'auto' }}>
@@ -4118,7 +5449,7 @@ function Documentation() {
                 <Typography paragraph>
                   <strong>Bonded</strong> is a modern, group-based social platform for sharing memories, planning events, and playing interactive games. Each group is isolated, with unique usernames per group. The platform now features a suite of social games, exclusive Cloudinary media storage, and a streamlined login flow (no group selection after login).
                 </Typography>
-                <Typography variant="h6" gutterBottom>Key Features (v1.2.0):</Typography>
+                <Typography variant="h6" gutterBottom>Key Features (v1.3.0):</Typography>
                 <List dense>
                   <ListItem>• Group-based social networking with isolated data</ListItem>
                   <ListItem>• Multi-group membership support</ListItem>
@@ -4527,7 +5858,7 @@ function AppContent() {
                 © 2025 Aniruddha H D. All rights reserved.
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                Version 1.2.0
+                Version 1.3.0
               </Typography>
             </Box>
           </Container>

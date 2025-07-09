@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 # Configuration
 BASE_URL = "http://localhost:8000/api"
-GROUP_NAME = "Test Group API"
+GROUP_NAME = f"Test Group API {datetime.now().strftime('%Y%m%d_%H%M%S')}"
 USERNAME = "testuser"
 PASSWORD = "testpass123"
 
@@ -29,15 +29,15 @@ def test_games_api():
         if response.status_code == 201:
             print("✅ Group registered successfully")
             group_data = response.json()
-            # Handle different response formats
-            if 'group' in group_data:
-                group_id = group_data['group']['id']
-            elif 'id' in group_data:
-                group_id = group_data['id']
-            else:
-                print("❌ Unexpected response format")
-                print(group_data)
-                return
+            print(f"Response: {group_data}")  # Debug print
+            # The response contains the group name, not the ID
+            # We need to get the group ID by looking it up
+            group_name = group_data['group']
+            # Get the first credential for login
+            first_credential = group_data['credentials'][0]
+            USERNAME = first_credential['username']
+            PASSWORD = first_credential['password']
+            print(f"Using credentials: {USERNAME} / {PASSWORD}")
         else:
             print(f"❌ Failed to register group: {response.status_code}")
             print(response.text)
@@ -46,10 +46,34 @@ def test_games_api():
         print(f"❌ Error registering group: {e}")
         return
     
-    # Step 2: Login
-    print("\n2. Logging in...")
+    # Step 2: Change credentials (required before first login)
+    print("\n2. Changing credentials...")
+    change_data = {
+        "group": group_name,
+        "username": USERNAME,
+        "new_username": "testuser",
+        "new_password": "testpass123"
+    }
+    
+    try:
+        response = requests.post(f"{BASE_URL}/users/change-credentials/", json=change_data)
+        if response.status_code == 200:
+            print("✅ Credentials changed successfully")
+            # Update credentials for login
+            USERNAME = "testuser"
+            PASSWORD = "testpass123"
+        else:
+            print(f"❌ Failed to change credentials: {response.status_code}")
+            print(response.text)
+            return
+    except Exception as e:
+        print(f"❌ Error changing credentials: {e}")
+        return
+    
+    # Step 3: Login
+    print("\n3. Logging in...")
     login_data = {
-        "group_name": GROUP_NAME,
+        "group": group_name,
         "username": USERNAME,
         "password": PASSWORD
     }
@@ -61,6 +85,10 @@ def test_games_api():
             login_data = response.json()
             access_token = login_data['access']
             headers = {'Authorization': f'Bearer {access_token}'}
+            # Get group ID from memberships
+            memberships = login_data['memberships']
+            group_id = memberships[0]['group_id']  # Use the first membership
+            print(f"Group ID: {group_id}")
         else:
             print(f"❌ Login failed: {response.status_code}")
             print(response.text)
@@ -69,8 +97,8 @@ def test_games_api():
         print(f"❌ Error logging in: {e}")
         return
     
-    # Step 3: Test Challenges API
-    print("\n3. Testing Challenges API...")
+    # Step 4: Test Challenges API
+    print("\n4. Testing Challenges API...")
     
     # Create a challenge
     challenge_data = {
@@ -111,8 +139,8 @@ def test_games_api():
     except Exception as e:
         print(f"❌ Error getting challenges: {e}")
     
-    # Step 4: Test Streaks API
-    print("\n4. Testing Streaks API...")
+    # Step 5: Test Streaks API
+    print("\n5. Testing Streaks API...")
     
     # Update streak
     streak_data = {
@@ -142,8 +170,8 @@ def test_games_api():
     except Exception as e:
         print(f"❌ Error getting streaks: {e}")
     
-    # Step 5: Test Leaderboard API
-    print("\n5. Testing Leaderboard API...")
+    # Step 6: Test Leaderboard API
+    print("\n6. Testing Leaderboard API...")
     
     # Calculate leaderboard
     leaderboard_data = {
@@ -173,8 +201,8 @@ def test_games_api():
     except Exception as e:
         print(f"❌ Error getting leaderboard entries: {e}")
     
-    # Step 6: Test User Stats API
-    print("\n6. Testing User Stats API...")
+    # Step 7: Test User Stats API
+    print("\n7. Testing User Stats API...")
     
     try:
         response = requests.get(f"{BASE_URL}/games/user-stats/?group={group_id}", headers=headers)
